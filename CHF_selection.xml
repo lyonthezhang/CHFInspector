@@ -1,0 +1,48 @@
+<system label="LTE">
+
+    <VARS>
+        <VAR label="pcf_provides_address">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>SMF</fsm>
+        </VAR>
+
+         <VAR label="udm_provides_characteristics">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>SMF</fsm>
+        </VAR>
+
+        <VAR label="nrf_discover_requested">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>SMF</fsm>
+        </VAR>
+
+        <VAR label="nrf_discover_completed">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>SMF</fsm>
+        </VAR>
+
+        <VAR label="has_local_CHF_charactaristics">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>SMF</fsm>
+        </VAR>
+    </VARS>
+
+    <FSMs>
+        <FSM label="SMF">
+
+            <states>
+                <state>chf_unselected</state>
+                <state>chf_selected</state>
+            </states>
+
+            <init_state>chf_unselected</init_state>
+
+        <FSM>
+    </FSMs>
+
+</system>
