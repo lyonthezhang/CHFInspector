@@ -41,7 +41,7 @@
 
         <VAR label="incoming_pmf_init">
             <datatype>boolean</datatype>
-            <controltype>environmeny</controltype>
+            <controltype>environment</controltype>
             <fsm>SMF</fsm>
         </VAR>
 
