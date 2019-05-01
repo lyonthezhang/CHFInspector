@@ -1,4 +1,4 @@
-<system label="LTE">
+<system label="5G">
 
     <VARS>
         <VAR label="pcf_provides_address">
@@ -15,11 +15,19 @@
 
         <VAR label="nrf_discover_requested">
             <datatype>boolean</datatype>
-            <controltype> environment </controltype>
-            <fsm>SMF</fsm>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
         </VAR>
 
         <VAR label="nrf_discover_completed">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="nrf_discover_good">
             <datatype>boolean</datatype>
             <controltype> environment </controltype>
             <fsm>SMF</fsm>
@@ -29,6 +37,19 @@
             <datatype>boolean</datatype>
             <controltype> environment </controltype>
             <fsm>SMF</fsm>
+        </VAR>
+
+        <VAR label="incoming_pmf_init">
+            <datatype>boolean</datatype>
+            <controltype>environmeny</controltype>
+            <fsm>SMF</fsm>
+        </VAR>
+
+        <VAR label="has_charging_identifier">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
         </VAR>
     </VARS>
 
@@ -41,6 +62,120 @@
             </states>
 
             <init_state>chf_unselected</init_state>
+
+            <!-- Initialize from PCF if available -->
+            <transitions>
+                <transition label="pdu_session_initialize_pcf">
+                    <start>chf_unselected</start>
+                    <end>chf_selected</end>
+
+                    <condition>
+                        incoming_pmf_init &amp; pcf_provides_address
+                    </condition>
+
+                    <actions>
+                        <action label="has_charging_identifier = TRUE">
+                            <channel label="internal">
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+            </transitions>
+
+            <!-- Initialize from UDM if available -->
+            <transitions>
+                <transition label="pdu_session_initialize_udm">
+                    <start>chf_unselected</start>
+                    <end>chf_selected</end>
+
+                    <condition>
+                        incoming_pmf_init &amp; !pcf_provides_address &amp; udm_provides_characteristics
+                    </condition>
+
+                    <actions>
+                        <action label="has_charging_identifier = TRUE">
+                            <channel label="internal">
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+            </transitions>
+
+            <!-- Initialize NRF request if above not available -->
+            <transitions>
+                <transition label="pdu_session_initialize_nrf_request">
+                    <start>chf_unselected</start>
+                    <end>chf_unselected</end>
+
+                    <condition>
+                        incoming_pmf_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; !nrf_request_started
+                    </condition>
+
+                    <actions>
+                        <action label="nrf_request_started = TRUE">
+                            <channel label="internal">
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+            </transitions>
+
+            <!-- Finalize the NRF request if it was started -->
+            <transitions>
+                <transition label="pdu_session_initialize_nrf_complete">
+                    <start>chf_unselected</start>
+                    <end>chf_unselected</end>
+
+                    <condition>
+                        incoming_pmf_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; nrf_request_started &amp; !nrf_request_completed
+                    </condition>
+
+                    <actions>
+                        <action label="nrf_request_completed = TRUE">
+                            <channel label="internal">
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+            </transitions>
+
+            <!-- Initialize with NRF information after the above request finishes -->
+            <transitions>
+                <transition label="pdu_session_initialize_nrf">
+                    <start>chf_unselected</start>
+                    <end>chf_selected</end>
+
+                    <condition>
+                        incoming_pmf_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; nrf_request_completed
+                    </condition>
+
+                    <actions>
+                        <action label="has_charging_identifier = TRUE">
+                            <channel label="internal">
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+            </transitions>
+
+            <!-- Initialize with internal CHF informaiton if nothing else available -->
+            <transitions>
+                <transition label="pdu_session_initialize_local">
+                    <start>chf_unselected</start>
+                    <end>chf_selected</end>
+
+                    <condition>
+                        incoming_pmf_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; !nrf_request_started &amp; !nrf_request_completed
+                    </condition>
+
+                    <actions>
+                        <action label="has_charging_identifier = TRUE">
+                            <channel label="internal">
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+            </transitions>
 
         <FSM>
     </FSMs>
