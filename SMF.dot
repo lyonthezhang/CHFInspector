@@ -6,5 +6,25 @@ node [shape = circle, label="chf_selected"]chf_selected;
 chf_unselected -> chf_selected [label = "pdu_T1: 
                         incoming_pmf_init & pcf_provides_address
                     /
-has_charging_identifier = TRUE"]
+select_CHF, has_charging_identifier = TRUE"]
+chf_unselected -> chf_selected [label = "pdu_T2: 
+                        incoming_pmf_init & !pcf_provides_address & udm_provides_characteristics
+                    /
+select_CHF, has_charging_identifier = TRUE"]
+chf_unselected -> chf_unselected [label = "pdu_T3: 
+                        incoming_pmf_init & !pcf_provides_address & !udm_provides_characteristics & !nrf_request_started
+                    /
+select_CHF, nrf_request_started = TRUE"]
+chf_unselected -> chf_unselected [label = "pdu_T4: 
+                        incoming_pmf_init & !pcf_provides_address & !udm_provides_characteristics & nrf_request_started & !nrf_request_completed
+                    /
+select_CHF, nrf_request_completed = TRUE"]
+chf_unselected -> chf_selected [label = "pdu_T5: 
+                        incoming_pmf_init & !pcf_provides_address & !udm_provides_characteristics & nrf_request_completed
+                    /
+select_CHF, has_charging_identifier = TRUE"]
+chf_unselected -> chf_selected [label = "pdu_T6: 
+                        incoming_pmf_init & !pcf_provides_address & !udm_provides_characteristics & !nrf_request_started & !nrf_request_completed
+                    /
+select_CHF, has_charging_identifier = TRUE"]
 }

@@ -26,7 +26,7 @@ smf_state	:
 
 smf_action	:
 {
-	smf_null_action
+	smf_select_CHF
 };
 
 
@@ -35,6 +35,21 @@ DEFINE
 -----------------SMF transitions --------------------
 pdu_T1	:=	 (smf_state = chf_unselected & 
                         incoming_pmf_init & pcf_provides_address
+                    )	;
+pdu_T2	:=	 (smf_state = chf_unselected & 
+                        incoming_pmf_init & !pcf_provides_address & udm_provides_characteristics
+                    )	;
+pdu_T3	:=	 (smf_state = chf_unselected & 
+                        incoming_pmf_init & !pcf_provides_address & !udm_provides_characteristics & !nrf_request_started
+                    )	;
+pdu_T4	:=	 (smf_state = chf_unselected & 
+                        incoming_pmf_init & !pcf_provides_address & !udm_provides_characteristics & nrf_request_started & !nrf_request_completed
+                    )	;
+pdu_T5	:=	 (smf_state = chf_unselected & 
+                        incoming_pmf_init & !pcf_provides_address & !udm_provides_characteristics & nrf_request_completed
+                    )	;
+pdu_T6	:=	 (smf_state = chf_unselected & 
+                        incoming_pmf_init & !pcf_provides_address & !udm_provides_characteristics & !nrf_request_started & !nrf_request_completed
                     )	;
 
 ------------------- Noisy Channels --------------------
@@ -54,7 +69,8 @@ init(smf_state)	:=chf_unselected;
 
 next(smf_state)	:=	 case
 
-(pdu_T1 )	:	chf_selected	;
+(pdu_T3 | pdu_T4 )	:	chf_unselected	;
+(pdu_T1 | pdu_T2 | pdu_T5 | pdu_T6 )	:	chf_selected	;
 TRUE	:	smf_state	;
 esac	;
 
@@ -63,6 +79,7 @@ init(smf_action)	:= smf_null_action	;
 
 next(smf_action)	:=	 case
 
+(pdu_T1 | pdu_T2 | pdu_T3 | pdu_T4 | pdu_T5 | pdu_T6 )	:	smf_select_CHF	;
 TRUE	:	smf_null_action	;
 esac	;
 
@@ -70,7 +87,7 @@ esac	;
 init(has_charging_identifier)	:= FALSE	;
 
 next(has_charging_identifier)	:=	 case
-(pdu_T1 )	:	TRUE	;
+(pdu_T1 | pdu_T2 | pdu_T5 | pdu_T6 )	:	TRUE	;
 TRUE	:	has_charging_identifier	;
 esac	;
 

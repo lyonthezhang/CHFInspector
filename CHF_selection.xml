@@ -74,6 +74,12 @@
                     </condition>
 
                     <actions>
+                        <action label="select_CHF">
+                            <channel label="chan_SMF">
+                            <start> SMF </start>
+                            <end> SMF </end>
+                            </channel>
+                        </action>
                         <action label="has_charging_identifier = TRUE">
                             <channel label="internal">
                             <start> SMF </start>
@@ -82,11 +88,8 @@
                         </action>
                     </actions>
                 </transition>
-            </transitions>
 
-            
-            <transitions>
-                <transition label="pdu_session_initialize_udm">
+                <transition label="pdu_T2">
                     <start>chf_unselected</start>
                     <end>chf_selected</end>
 
@@ -95,6 +98,12 @@
                     </condition>
 
                     <actions>
+                        <action label="select_CHF">
+                            <channel label="chan_SMF">
+                            <start> SMF </start>
+                            <end> SMF </end>
+                        </channel>
+                        </action>
                         <action label="has_charging_identifier = TRUE">
                             <channel label="internal">
                             <start> SMF </start>
@@ -103,11 +112,8 @@
                         </action>
                     </actions>
                 </transition>
-            </transitions>
 
-            
-            <transitions>
-                <transition label="pdu_session_initialize_nrf_request">
+                <transition label="pdu_T3">
                     <start>chf_unselected</start>
                     <end>chf_unselected</end>
 
@@ -116,6 +122,12 @@
                     </condition>
 
                     <actions>
+                        <action label="select_CHF">
+                            <channel label="chan_SMF">
+                            <start> SMF </start>
+                            <end> SMF </end>
+                        </channel>
+                        </action>
                         <action label="nrf_request_started = TRUE">
                             <channel label="internal">
                             <start> SMF </start>
@@ -124,11 +136,8 @@
                         </action>
                     </actions>
                 </transition>
-            </transitions>
 
-            
-            <transitions>
-                <transition label="pdu_session_initialize_nrf_complete">
+                <transition label="pdu_T4">
                     <start>chf_unselected</start>
                     <end>chf_unselected</end>
 
@@ -137,6 +146,12 @@
                     </condition>
 
                     <actions>
+                        <action label="select_CHF">
+                            <channel label="chan_SMF">
+                            <start> SMF </start>
+                            <end> SMF </end>
+                        </channel>
+                        </action>
                         <action label="nrf_request_completed = TRUE">
                             <channel label="internal">
                             <start> SMF </start>
@@ -145,11 +160,8 @@
                         </action>
                     </actions>
                 </transition>
-            </transitions>
 
-            
-            <transitions>
-                <transition label="pdu_session_initialize_nrf">
+                <transition label="pdu_T5">
                     <start>chf_unselected</start>
                     <end>chf_selected</end>
 
@@ -158,6 +170,12 @@
                     </condition>
 
                     <actions>
+                        <action label="select_CHF">
+                            <channel label="chan_SMF">
+                            <start> SMF </start>
+                            <end> SMF </end>
+                        </channel>
+                        </action>
                         <action label="has_charging_identifier = TRUE">
                             <channel label="internal">
                             <start> SMF </start>
@@ -166,11 +184,8 @@
                         </action>
                     </actions>
                 </transition>
-            </transitions>
 
-            
-            <transitions>
-                <transition label="pdu_session_initialize_local">
+                <transition label="pdu_T6">
                     <start>chf_unselected</start>
                     <end>chf_selected</end>
 
@@ -179,6 +194,12 @@
                     </condition>
 
                     <actions>
+                        <action label="select_CHF">
+                            <channel label="chan_SMF">
+                            <start> SMF </start>
+                            <end> SMF </end>
+                        </channel>
+                        </action>
                         <action label="has_charging_identifier = TRUE">
                             <channel label="internal">
                             <start> SMF </start>
