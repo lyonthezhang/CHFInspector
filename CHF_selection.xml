@@ -177,7 +177,7 @@
                 </transition>
             </transitions>
 
-        <FSM>
+        </FSM>
     </FSMs>
 
 </system>
