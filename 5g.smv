@@ -1,0 +1,77 @@
+MODULE main
+
+VAR
+
+
+------------------- Environment and State variables --------------------
+pcf_provides_address	:	boolean;	
+udm_provides_characteristics	:	boolean;	
+nrf_discover_requested	:	boolean;	
+nrf_discover_completed	:	boolean;	
+nrf_discover_good	:	boolean;	
+has_local_CHF_charactaristics	:	boolean;	
+incoming_pmf_init	:	boolean;	
+has_charging_identifier	:	boolean;	
+
+----------------- Sequence numbers -------------------
+
+---------------- state for SMF state machine ----------------
+
+smf_state	:
+{
+	chf_unselected,
+	chf_selected
+};
+------------ Possible SMF actions ----------------
+
+smf_action	:
+{
+	smf_null_action
+};
+
+
+DEFINE
+
+-----------------SMF transitions --------------------
+pdu_T1	:=	 (smf_state = chf_unselected & 
+                        incoming_pmf_init & pcf_provides_address
+                    )	;
+
+------------------- Noisy Channels --------------------
+
+------------------- Adversary enabled or not --------------------
+
+
+ASSIGN
+
+
+------------------- Adversarial state machines --------------------
+
+
+---------------SMF state machine ------------------
+
+init(smf_state)	:=chf_unselected;
+
+next(smf_state)	:=	 case
+
+(pdu_T1 )	:	chf_selected	;
+TRUE	:	smf_state	;
+esac	;
+
+
+init(smf_action)	:= smf_null_action	;
+
+next(smf_action)	:=	 case
+
+TRUE	:	smf_null_action	;
+esac	;
+
+
+init(has_charging_identifier)	:= FALSE	;
+
+next(has_charging_identifier)	:=	 case
+(pdu_T1 )	:	TRUE	;
+TRUE	:	has_charging_identifier	;
+esac	;
+
+

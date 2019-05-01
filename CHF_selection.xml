@@ -63,9 +63,9 @@
 
             <init_state>chf_unselected</init_state>
 
-            <!-- Initialize from PCF if available -->
+            
             <transitions>
-                <transition label="pdu_session_initialize_pcf">
+                <transition label="pdu_T1">
                     <start>chf_unselected</start>
                     <end>chf_selected</end>
 
@@ -76,13 +76,15 @@
                     <actions>
                         <action label="has_charging_identifier = TRUE">
                             <channel label="internal">
+                            <start> SMF </start>
+                            <end> SMF </end>
                             </channel>
                         </action>
                     </actions>
                 </transition>
             </transitions>
 
-            <!-- Initialize from UDM if available -->
+            
             <transitions>
                 <transition label="pdu_session_initialize_udm">
                     <start>chf_unselected</start>
@@ -95,13 +97,15 @@
                     <actions>
                         <action label="has_charging_identifier = TRUE">
                             <channel label="internal">
+                            <start> SMF </start>
+                            <end> SMF </end>
                             </channel>
                         </action>
                     </actions>
                 </transition>
             </transitions>
 
-            <!-- Initialize NRF request if above not available -->
+            
             <transitions>
                 <transition label="pdu_session_initialize_nrf_request">
                     <start>chf_unselected</start>
@@ -114,13 +118,15 @@
                     <actions>
                         <action label="nrf_request_started = TRUE">
                             <channel label="internal">
+                            <start> SMF </start>
+                            <end> SMF </end>
                             </channel>
                         </action>
                     </actions>
                 </transition>
             </transitions>
 
-            <!-- Finalize the NRF request if it was started -->
+            
             <transitions>
                 <transition label="pdu_session_initialize_nrf_complete">
                     <start>chf_unselected</start>
@@ -133,13 +139,15 @@
                     <actions>
                         <action label="nrf_request_completed = TRUE">
                             <channel label="internal">
+                            <start> SMF </start>
+                            <end> SMF </end>
                             </channel>
                         </action>
                     </actions>
                 </transition>
             </transitions>
 
-            <!-- Initialize with NRF information after the above request finishes -->
+            
             <transitions>
                 <transition label="pdu_session_initialize_nrf">
                     <start>chf_unselected</start>
@@ -152,13 +160,15 @@
                     <actions>
                         <action label="has_charging_identifier = TRUE">
                             <channel label="internal">
+                            <start> SMF </start>
+                            <end> SMF </end>
                             </channel>
                         </action>
                     </actions>
                 </transition>
             </transitions>
 
-            <!-- Initialize with internal CHF informaiton if nothing else available -->
+            
             <transitions>
                 <transition label="pdu_session_initialize_local">
                     <start>chf_unselected</start>
@@ -171,6 +181,8 @@
                     <actions>
                         <action label="has_charging_identifier = TRUE">
                             <channel label="internal">
+                            <start> SMF </start>
+                            <end> SMF </end>
                             </channel>
                         </action>
                     </actions>

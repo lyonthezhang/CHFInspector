@@ -1,0 +1,10 @@
+digraph SMF{
+rankdir = LR;
+size = "8,5"
+node [shape = circle, label="chf_unselected"]chf_unselected;
+node [shape = circle, label="chf_selected"]chf_selected;
+chf_unselected -> chf_selected [label = "pdu_T1: 
+                        incoming_pmf_init & pcf_provides_address
+                    /
+has_charging_identifier = TRUE"]
+}
