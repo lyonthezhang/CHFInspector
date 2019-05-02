@@ -124,7 +124,7 @@
                     <end>chf_unselected</end>
 
                     <condition>
-                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; !nrf_request_started
+                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; !nrf_discover_requested
                     </condition>
 
                     <actions>
@@ -134,7 +134,7 @@
                             <end> SMF </end>
                         </channel>
                         </action>
-                        <action label="nrf_request_started = TRUE">
+                        <action label="nrf_discover_requested = TRUE">
                             <channel label="internal">
                             <start> SMF </start>
                             <end> SMF </end>
@@ -148,7 +148,7 @@
                     <end>chf_unselected</end>
 
                     <condition>
-                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; nrf_request_started &amp; !nrf_request_completed
+                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; nrf_discover_requested &amp; !nrf_discover_completed
                     </condition>
 
                     <actions>
@@ -158,7 +158,7 @@
                             <end> SMF </end>
                         </channel>
                         </action>
-                        <action label="nrf_request_completed = TRUE">
+                        <action label="nrf_discover_completed = TRUE">
                             <channel label="internal">
                             <start> SMF </start>
                             <end> SMF </end>
@@ -172,7 +172,7 @@
                     <end>chf_selected</end>
 
                     <condition>
-                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; nrf_request_completed
+                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; nrf_discover_completed
                     </condition>
 
                     <actions>
@@ -196,7 +196,7 @@
                     <end>chf_selected</end>
 
                     <condition>
-                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; !nrf_request_started &amp; !nrf_request_completed
+                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; !nrf_discover_requested &amp; !nrf_discover_completed
                     </condition>
 
                     <actions>
@@ -215,7 +215,7 @@
                     </actions>
                 </transition>
 
-                <transition label="pdu_TX">
+                <transition label="pdu_T7">
                     <start>chf_selected</start>
                     <end>chf_unselected</end>
 

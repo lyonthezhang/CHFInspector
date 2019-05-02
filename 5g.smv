@@ -10,7 +10,8 @@ nrf_discover_requested	:	boolean;
 nrf_discover_completed	:	boolean;	
 nrf_discover_good	:	boolean;	
 has_local_CHF_charactaristics	:	boolean;	
-incoming_pmf_init	:	boolean;	
+incoming_pdu_init	:	boolean;	
+pdu_fin	:	boolean;	
 has_charging_identifier	:	boolean;	
 
 ----------------- Sequence numbers -------------------
@@ -34,22 +35,25 @@ DEFINE
 
 -----------------SMF transitions --------------------
 pdu_T1	:=	 (smf_state = chf_unselected & 
-                        incoming_pmf_init & pcf_provides_address
+                        incoming_pdu_init & pcf_provides_address
                     )	;
 pdu_T2	:=	 (smf_state = chf_unselected & 
-                        incoming_pmf_init & !pcf_provides_address & udm_provides_characteristics
+                        incoming_pdu_init & !pcf_provides_address & udm_provides_characteristics
                     )	;
 pdu_T3	:=	 (smf_state = chf_unselected & 
-                        incoming_pmf_init & !pcf_provides_address & !udm_provides_characteristics & !nrf_request_started
+                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & !nrf_discover_requested
                     )	;
 pdu_T4	:=	 (smf_state = chf_unselected & 
-                        incoming_pmf_init & !pcf_provides_address & !udm_provides_characteristics & nrf_request_started & !nrf_request_completed
+                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & nrf_discover_requested & !nrf_discover_completed
                     )	;
 pdu_T5	:=	 (smf_state = chf_unselected & 
-                        incoming_pmf_init & !pcf_provides_address & !udm_provides_characteristics & nrf_request_completed
+                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & nrf_discover_completed
                     )	;
 pdu_T6	:=	 (smf_state = chf_unselected & 
-                        incoming_pmf_init & !pcf_provides_address & !udm_provides_characteristics & !nrf_request_started & !nrf_request_completed
+                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & !nrf_discover_requested & !nrf_discover_completed
+                    )	;
+pdu_T7	:=	 (smf_state = chf_selected & 
+                        pdu_fin
                     )	;
 
 ------------------- Noisy Channels --------------------
@@ -69,7 +73,7 @@ init(smf_state)	:=chf_unselected;
 
 next(smf_state)	:=	 case
 
-(pdu_T3 | pdu_T4 )	:	chf_unselected	;
+(pdu_T3 | pdu_T4 | pdu_T7 )	:	chf_unselected	;
 (pdu_T1 | pdu_T2 | pdu_T5 | pdu_T6 )	:	chf_selected	;
 TRUE	:	smf_state	;
 esac	;
@@ -79,9 +83,27 @@ init(smf_action)	:= smf_null_action	;
 
 next(smf_action)	:=	 case
 
-(pdu_T1 | pdu_T2 | pdu_T3 | pdu_T4 | pdu_T5 | pdu_T6 )	:	smf_select_CHF	;
+(pdu_T1 | pdu_T2 | pdu_T3 | pdu_T4 | pdu_T5 | pdu_T6 | pdu_T7 )	:	smf_select_CHF	;
 TRUE	:	smf_null_action	;
 esac	;
+
+
+init(nrf_discover_requested)	:= FALSE	;
+
+next(nrf_discover_requested)	:=	 case
+(pdu_T3 )	:	TRUE	;
+TRUE	:	nrf_discover_requested	;
+esac	;
+
+
+
+init(nrf_discover_completed)	:= FALSE	;
+
+next(nrf_discover_completed)	:=	 case
+(pdu_T4 )	:	TRUE	;
+TRUE	:	nrf_discover_completed	;
+esac	;
+
 
 
 init(has_charging_identifier)	:= FALSE	;
