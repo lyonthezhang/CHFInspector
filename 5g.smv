@@ -27,7 +27,8 @@ smf_state	:
 
 smf_action	:
 {
-	smf_select_CHF
+	smf_select_CHF,
+    smf_null_action
 };
 
 
