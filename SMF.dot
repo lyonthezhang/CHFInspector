@@ -20,11 +20,11 @@ chf_unselected -> chf_unselected [label = "pdu_T4:
                     /
 select_CHF, nrf_discover_completed = TRUE"]
 chf_unselected -> chf_selected [label = "pdu_T5: 
-                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & nrf_discover_completed
+                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & nrf_discover_completed & nrf_discover_good
                     /
 select_CHF, has_charging_identifier = TRUE"]
 chf_unselected -> chf_selected [label = "pdu_T6: 
-                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & !nrf_discover_requested & !nrf_discover_completed
+                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & !nrf_discover_requested & (nrf_discover_completed & !nrf_discover_good) & has_local_CHF_charactaristics
                     /
 select_CHF, has_charging_identifier = TRUE"]
 chf_selected -> chf_unselected [label = "pdu_T7: 

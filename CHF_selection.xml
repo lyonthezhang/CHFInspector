@@ -172,7 +172,7 @@
                     <end>chf_selected</end>
 
                     <condition>
-                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; nrf_discover_completed
+                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; nrf_discover_completed &amp; nrf_discover_good
                     </condition>
 
                     <actions>
@@ -196,7 +196,7 @@
                     <end>chf_selected</end>
 
                     <condition>
-                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; !nrf_discover_requested &amp; !nrf_discover_completed
+                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; !nrf_discover_requested &amp; (nrf_discover_completed &amp; !nrf_discover_good) &amp; has_local_CHF_charactaristics
                     </condition>
 
                     <actions>

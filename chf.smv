@@ -47,10 +47,10 @@ pdu_T4	:=	 (smf_state = chf_unselected &
                         incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & nrf_discover_requested & !nrf_discover_completed
                     )	;
 pdu_T5	:=	 (smf_state = chf_unselected & 
-                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & nrf_discover_completed
+                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & nrf_discover_completed & nrf_discover_good
                     )	;
 pdu_T6	:=	 (smf_state = chf_unselected & 
-                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & !nrf_discover_requested & !nrf_discover_completed
+                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & !nrf_discover_requested & (nrf_discover_completed & !nrf_discover_good) & has_local_CHF_charactaristics
                     )	;
 pdu_T7	:=	 (smf_state = chf_selected & 
                         pdu_fin
@@ -114,4 +114,8 @@ TRUE	:	has_charging_identifier	;
 esac	;
 
 
-LTLSPEC G(nrf_discover_completed) -> O(nrf_discover_requested);
+---Discovery may only complete after discovery was initiated
+LTLSPEC nrf_discover_completed -> O(nrf_discover_requested);
+
+---If a PDU init happens, we will always eventually get the CHF identifier (deliberately has counterexample)
+LTLSPEC incoming_pdu_init -> F(has_charging_identifier);

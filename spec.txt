@@ -1,1 +1,5 @@
-LTLSPEC G(nrf_discover_completed) -> O(nrf_discover_requested);
+---Discovery may only complete after discovery was initiated
+LTLSPEC nrf_discover_completed -> O(nrf_discover_requested);
+
+---If a PDU init happens, we will always eventually get the CHF identifier (deliberately has counterexample)
+LTLSPEC incoming_pdu_init -> F(has_charging_identifier);
