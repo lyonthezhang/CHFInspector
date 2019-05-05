@@ -1,0 +1,1 @@
+LTLSPEC G(nrf_discover_completed) -> O(nrf_discover_requested);

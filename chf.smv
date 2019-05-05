@@ -27,8 +27,7 @@ smf_state	:
 
 smf_action	:
 {
-	smf_select_CHF,
-    smf_null_action
+	smf_select_CHF
 };
 
 
@@ -115,3 +114,4 @@ TRUE	:	has_charging_identifier	;
 esac	;
 
 
+LTLSPEC G(nrf_discover_completed) -> O(nrf_discover_requested);
