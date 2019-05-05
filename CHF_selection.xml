@@ -48,6 +48,7 @@
         <VAR label="pdu_fin">
             <datatype>boolean</datatype>
             <controltype> environment </controltype>
+            <initialvalue>FALSE</initialvalue>
             <fsm>SMF</fsm>
         </VAR>
 
