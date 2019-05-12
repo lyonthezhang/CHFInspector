@@ -1,0 +1,31 @@
+VARS:
+  ue_trusts_en_download:
+    type: env_bool
+    fsm: UE
+  ue_desire_emergency:
+    type: env_bool
+    fsm: UE
+
+FSMS:
+  UE:
+    states:
+      - ue_disconnected
+      - ue_registering
+      - ue_registered
+    init_state: ue_disconnected
+    transitions:
+      'ue_desire_emergency':
+        start: ue_disconnected
+        end: ue_registering
+        send:
+          - ue_test:
+              using: 'chan_UN'
+          - ue_test2:
+              using: 'chan_UN'
+        set:
+          - 'test_var = TRUE'
+CHANNELS:
+  chan_UN:
+    tx: UE
+    rx: NET
+
