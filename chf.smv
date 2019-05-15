@@ -4,57 +4,91 @@ VAR
 
 
 ------------------- Environment and State variables --------------------
-pcf_provides_address	:	boolean;	
-udm_provides_characteristics	:	boolean;	
-nrf_discover_requested	:	boolean;	
-nrf_discover_completed	:	boolean;	
-nrf_discover_good	:	boolean;	
-has_local_CHF_charactaristics	:	boolean;	
-incoming_pdu_init	:	boolean;	
-pdu_fin	:	boolean;	
-has_charging_identifier	:	boolean;	
+pdu_session_establishment_requested	:	boolean;	
+process_initiated	:	boolean;	
+sm_context_request	:	boolean;	
+sm_context_request_success	:	boolean;	
+sm_context_response	:	boolean;	
+sm_context_response_success	:	boolean;	
+n4_session_request	:	boolean;	
+n4_session_request_success	:	boolean;	
+n4_session_response	:	boolean;	
+n4_session_response_success	:	boolean;	
+nsmf_pdu_session_request	:	boolean;	
+nsmf_pdu_session_response_success	:	boolean;	
+nsmf_pdu_session_response	:	boolean;	
+nsmf_message_transfer	:	boolean;	
+n2_pdu_session_request	:	boolean;	
+n2_pdu_session_request_success	:	boolean;	
+n2_pdu_session_ACK	:	boolean;	
+n2_pdu_session_ACKed	:	boolean;	
 
 ----------------- Sequence numbers -------------------
 
----------------- state for SMF state machine ----------------
+---------------- state for visited_plmn state machine ----------------
 
-smf_state	:
+visited_plmn_state	:
 {
-	chf_unselected,
-	chf_selected
+	no_session,
+	session_establishment_requested,
+	sm_context_requested,
+	sm_context_complete,
+	n4_session_requested,
+	n4_session_complete,
+	nsmf_pdu_requested,
+	nsmf_pdu_complete,
+	n2_pdu_requested,
+	session_establishment_successful
 };
------------- Possible SMF actions ----------------
+------------ Possible visited_plmn actions ----------------
 
-smf_action	:
+visited_plmn_action	:
 {
-	smf_select_CHF,
-    smf_null_action
+	visited_plmn_establish_request,
+	visited_plmn_send_sm_context_request,
+	visited_plmn_rcv_sm_context_response,
+	visited_plmn_null_action,
+	visited_plmn_send_n4_request,
+	visited_plmn_rcv_n4_response,
+	visited_plmn_request_nsm_pdu,
+	visited_plmn_rcv_nsm_pdu_response,
+	visited_plmn_request_n2_pdu,
+	visited_plmn_n2_request_acked
 };
 
 
 DEFINE
 
------------------SMF transitions --------------------
-pdu_T1	:=	 (smf_state = chf_unselected & 
-                        incoming_pdu_init & pcf_provides_address
+-----------------visited_plmn transitions --------------------
+T1_T1	:=	 (visited_plmn_state = no_session & 
+                        pdu_session_establishment_requested
                     )	;
-pdu_T2	:=	 (smf_state = chf_unselected & 
-                        incoming_pdu_init & !pcf_provides_address & udm_provides_characteristics
+T2_T2	:=	 (visited_plmn_state = session_establishment_requested & 
+                        process_initiated & sm_context_request_success
                     )	;
-pdu_T3	:=	 (smf_state = chf_unselected & 
-                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & !nrf_discover_requested
+T3_T3	:=	 (visited_plmn_state = sm_context_requested & 
+                        process_initiated & sm_context_request & sm_context_response_success
                     )	;
-pdu_T4	:=	 (smf_state = chf_unselected & 
-                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & nrf_discover_requested & !nrf_discover_completed
+failure_T4	:=	 (visited_plmn_state = sm_context_requested & 
+                        process_initiated & sm_context_request & !sm_context_response_success
                     )	;
-pdu_T5	:=	 (smf_state = chf_unselected & 
-                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & nrf_discover_completed & nrf_discover_good
+T4_T5	:=	 (visited_plmn_state = sm_context_complete & 
+                        process_initiated & sm_context_request & sm_context_response & n4_session_request_success
                     )	;
-pdu_T6	:=	 (smf_state = chf_unselected & 
-                        incoming_pdu_init & !pcf_provides_address & !udm_provides_characteristics & !nrf_discover_requested & (nrf_discover_completed & !nrf_discover_good) & has_local_CHF_charactaristics
+T5_T6	:=	 (visited_plmn_state = n4_session_requested & 
+                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response_success
                     )	;
-pdu_T7	:=	 (smf_state = chf_selected & 
-                        pdu_fin
+T6_T7	:=	 (visited_plmn_state = n4_session_complete & 
+                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response
+                    )	;
+T7_T8	:=	 (visited_plmn_state = nsmf_pdu_requested & 
+                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response & nsmf_pdu_session_request & nsmf_pdu_session_response_success
+                    )	;
+T8_T9	:=	 (visited_plmn_state = nsmf_pdu_complete & 
+                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response & nsmf_pdu_session_request & nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request_success
+                    )	;
+T9_T10	:=	 (visited_plmn_state = n2_pdu_requested & 
+                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response & nsmf_pdu_session_request & nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request & n2_pdu_session_ACKed
                     )	;
 
 ------------------- Noisy Channels --------------------
@@ -68,58 +102,125 @@ ASSIGN
 ------------------- Adversarial state machines --------------------
 
 
----------------SMF state machine ------------------
+---------------visited_plmn state machine ------------------
 
-init(smf_state)	:=chf_unselected;
+init(visited_plmn_state)	:=no_session;
 
-next(smf_state)	:=	 case
+next(visited_plmn_state)	:=	 case
 
-(pdu_T3 | pdu_T4 | pdu_T7 )	:	chf_unselected	;
-(pdu_T1 | pdu_T2 | pdu_T5 | pdu_T6 )	:	chf_selected	;
-TRUE	:	smf_state	;
+(T1_T1 )	:	session_establishment_requested	;
+(T2_T2 | failure_T4 )	:	sm_context_requested	;
+(T3_T3 )	:	sm_context_complete	;
+(T4_T5 )	:	n4_session_requested	;
+(T5_T6 )	:	n4_session_complete	;
+(T6_T7 )	:	nsmf_pdu_requested	;
+(T7_T8 )	:	nsmf_pdu_complete	;
+(T8_T9 )	:	n2_pdu_requested	;
+(T9_T10 )	:	session_establishment_successful	;
+TRUE	:	visited_plmn_state	;
 esac	;
 
 
-init(smf_action)	:= smf_null_action	;
+init(visited_plmn_action)	:= visited_plmn_null_action	;
 
-next(smf_action)	:=	 case
+next(visited_plmn_action)	:=	 case
 
-(pdu_T1 | pdu_T2 | pdu_T3 | pdu_T4 | pdu_T5 | pdu_T6 | pdu_T7 )	:	smf_select_CHF	;
-TRUE	:	smf_null_action	;
+(T1_T1 )	:	visited_plmn_establish_request	;
+(T2_T2 )	:	visited_plmn_send_sm_context_request	;
+(T3_T3 )	:	visited_plmn_rcv_sm_context_response	;
+(failure_T4 )	:	visited_plmn_null_action	;
+(T4_T5 )	:	visited_plmn_send_n4_request	;
+(T5_T6 )	:	visited_plmn_rcv_n4_response	;
+(T6_T7 )	:	visited_plmn_request_nsm_pdu	;
+(T7_T8 )	:	visited_plmn_rcv_nsm_pdu_response	;
+(T8_T9 )	:	visited_plmn_request_n2_pdu	;
+(T9_T10 )	:	visited_plmn_n2_request_acked	;
+TRUE	:	visited_plmn_null_action	;
 esac	;
 
 
-init(nrf_discover_requested)	:= FALSE	;
+init(process_initiated)	:= FALSE	;
 
-next(nrf_discover_requested)	:=	 case
-(pdu_T3 )	:	TRUE	;
-TRUE	:	nrf_discover_requested	;
+next(process_initiated)	:=	 case
+(T1_T1 )	:	TRUE	;
+TRUE	:	process_initiated	;
 esac	;
 
 
 
-init(nrf_discover_completed)	:= FALSE	;
+init(sm_context_request)	:= FALSE	;
 
-next(nrf_discover_completed)	:=	 case
-(pdu_T4 )	:	TRUE	;
-TRUE	:	nrf_discover_completed	;
+next(sm_context_request)	:=	 case
+(T2_T2 )	:	TRUE	;
+TRUE	:	sm_context_request	;
 esac	;
 
 
 
-init(has_charging_identifier)	:= FALSE	;
+init(sm_context_response)	:= FALSE	;
 
-next(has_charging_identifier)	:=	 case
-(pdu_T1 | pdu_T2 | pdu_T5 | pdu_T6 )	:	TRUE	;
-TRUE	:	has_charging_identifier	;
+next(sm_context_response)	:=	 case
+(T3_T3 )	:	TRUE	;
+TRUE	:	sm_context_response	;
 esac	;
 
 
----Discovery may only complete after discovery was initiated
-LTLSPEC nrf_discover_completed -> O(nrf_discover_requested);
 
----The state can only change to chf_selected once one of the methods has succeeded
-LTLSPEC has_charging_identifier -> (pcf_provides_address | udm_provides_characteristics | nrf_discover_good | has_local_CHF_charactaristics)
+init(n4_session_request)	:= FALSE	;
 
----If a PDU init happens, we will always eventually get the CHF identifier (deliberately has counterexample)
-LTLSPEC incoming_pdu_init -> F(has_charging_identifier);
+next(n4_session_request)	:=	 case
+(T4_T5 )	:	TRUE	;
+TRUE	:	n4_session_request	;
+esac	;
+
+
+
+init(n4_session_response)	:= FALSE	;
+
+next(n4_session_response)	:=	 case
+(T5_T6 )	:	TRUE	;
+TRUE	:	n4_session_response	;
+esac	;
+
+
+
+init(nsmf_pdu_session_request)	:= FALSE	;
+
+next(nsmf_pdu_session_request)	:=	 case
+(T6_T7 )	:	TRUE	;
+TRUE	:	nsmf_pdu_session_request	;
+esac	;
+
+
+
+init(nsmf_pdu_session_response)	:= FALSE	;
+
+next(nsmf_pdu_session_response)	:=	 case
+(T7_T8 )	:	TRUE	;
+TRUE	:	nsmf_pdu_session_response	;
+esac	;
+
+
+
+init(n2_pdu_session_request)	:= FALSE	;
+
+next(n2_pdu_session_request)	:=	 case
+(T8_T9 )	:	TRUE	;
+TRUE	:	n2_pdu_session_request	;
+esac	;
+
+
+
+init(n2_pdu_session_ACK)	:= FALSE	;
+
+next(n2_pdu_session_ACK)	:=	 case
+(T9_T10 )	:	TRUE	;
+TRUE	:	n2_pdu_session_ACK	;
+esac	;
+
+
+--- The process begins once the request for it is issued.
+LTLSPEC process_initiated -> O(pdu_session_establishment_requested)
+
+--- Purposely wrong. Says that a message will get a response if it's issued.
+LTLSPEC sm_context_request -> (n4_session_request & !n4_session_request)

@@ -1,0 +1,54 @@
+digraph visited_plmn{
+rankdir = LR;
+size = "8,5"
+node [shape = circle, label="no_session"]no_session;
+node [shape = circle, label="session_establishment_requested"]session_establishment_requested;
+node [shape = circle, label="sm_context_requested"]sm_context_requested;
+node [shape = circle, label="sm_context_complete"]sm_context_complete;
+node [shape = circle, label="n4_session_requested"]n4_session_requested;
+node [shape = circle, label="n4_session_complete"]n4_session_complete;
+node [shape = circle, label="nsmf_pdu_requested"]nsmf_pdu_requested;
+node [shape = circle, label="nsmf_pdu_complete"]nsmf_pdu_complete;
+node [shape = circle, label="n2_pdu_requested"]n2_pdu_requested;
+node [shape = circle, label="session_establishment_successful"]session_establishment_successful;
+no_session -> session_establishment_requested [label = "T1_T1: 
+                        pdu_session_establishment_requested
+                    /
+establish_request, process_initiated = TRUE"]
+session_establishment_requested -> sm_context_requested [label = "T2_T2: 
+                        process_initiated & sm_context_request_success
+                    /
+send_sm_context_request, sm_context_request = TRUE"]
+sm_context_requested -> sm_context_complete [label = "T3_T3: 
+                        process_initiated & sm_context_request & sm_context_response_success
+                    /
+rcv_sm_context_response, sm_context_response = TRUE"]
+sm_context_requested -> sm_context_requested [label = "failure_T4: 
+                        process_initiated & sm_context_request & !sm_context_response_success
+                    /
+null_action"]
+sm_context_complete -> n4_session_requested [label = "T4_T5: 
+                        process_initiated & sm_context_request & sm_context_response & n4_session_request_success
+                    /
+send_n4_request, n4_session_request = TRUE"]
+n4_session_requested -> n4_session_complete [label = "T5_T6: 
+                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response_success
+                    /
+rcv_n4_response, n4_session_response = TRUE"]
+n4_session_complete -> nsmf_pdu_requested [label = "T6_T7: 
+                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response
+                    /
+request_nsm_pdu, nsmf_pdu_session_request = TRUE"]
+nsmf_pdu_requested -> nsmf_pdu_complete [label = "T7_T8: 
+                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response & nsmf_pdu_session_request & nsmf_pdu_session_response_success
+                    /
+rcv_nsm_pdu_response, nsmf_pdu_session_response = TRUE"]
+nsmf_pdu_complete -> n2_pdu_requested [label = "T8_T9: 
+                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response & nsmf_pdu_session_request & nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request_success
+                    /
+request_n2_pdu, n2_pdu_session_request = TRUE"]
+n2_pdu_requested -> session_establishment_successful [label = "T9_T10: 
+                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response & nsmf_pdu_session_request & nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request & n2_pdu_session_ACKed
+                    /
+n2_request_acked, n2_pdu_session_ACK = TRUE"]
+}

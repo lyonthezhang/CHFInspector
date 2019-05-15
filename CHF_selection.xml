@@ -1,238 +1,380 @@
-<system label="5G">
+<system label="roaming_selection">
 
     <VARS>
-        <VAR label="pcf_provides_address">
+
+        <VAR label="pdu_session_establishment_requested">
             <datatype>boolean</datatype>
             <controltype> environment </controltype>
-            <fsm>SMF</fsm>
+            <fsm>visited_plmn</fsm>
         </VAR>
 
-         <VAR label="udm_provides_characteristics">
-            <datatype>boolean</datatype>
-            <controltype> environment </controltype>
-            <fsm>SMF</fsm>
-        </VAR>
-
-        <VAR label="nrf_discover_requested">
+        <VAR label="process_initiated">
             <datatype>boolean</datatype>
             <controltype>state</controltype>
             <possiblevalues>TRUE,FALSE</possiblevalues>
             <initialvalue>FALSE</initialvalue>
         </VAR>
 
-        <VAR label="nrf_discover_completed">
+        <VAR label="sm_context_request">
             <datatype>boolean</datatype>
             <controltype>state</controltype>
             <possiblevalues>TRUE,FALSE</possiblevalues>
             <initialvalue>FALSE</initialvalue>
         </VAR>
 
-        <VAR label="nrf_discover_good">
+        <VAR label="sm_context_request_success">
             <datatype>boolean</datatype>
             <controltype> environment </controltype>
-            <fsm>SMF</fsm>
+            <fsm>visited_plmn</fsm>
         </VAR>
 
-        <VAR label="has_local_CHF_charactaristics">
-            <datatype>boolean</datatype>
-            <controltype> environment </controltype>
-            <fsm>SMF</fsm>
-        </VAR>
-
-        <VAR label="incoming_pdu_init">
-            <datatype>boolean</datatype>
-            <controltype>environment</controltype>
-            <fsm>SMF</fsm>
-        </VAR>
-
-        <VAR label="pdu_fin">
-            <datatype>boolean</datatype>
-            <controltype> environment </controltype>
-            <initialvalue>FALSE</initialvalue>
-            <fsm>SMF</fsm>
-        </VAR>
-
-        <VAR label="has_charging_identifier">
+        <VAR label="sm_context_response">
             <datatype>boolean</datatype>
             <controltype>state</controltype>
             <possiblevalues>TRUE,FALSE</possiblevalues>
             <initialvalue>FALSE</initialvalue>
         </VAR>
+
+        <VAR label="sm_context_response_success">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>
+
+        <VAR label="n4_session_request">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="n4_session_request_success">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>
+
+        <VAR label="n4_session_response">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="n4_session_response_success">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>
+
+        <VAR label="nsmf_pdu_session_request">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="nsmf_pdu_session_response_success">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>
+
+        <VAR label="nsmf_pdu_session_response">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="nsmf_message_transfer">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>
+
+        <VAR label="n2_pdu_session_request">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="n2_pdu_session_request_success">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>
+
+        <VAR label="n2_pdu_session_ACK">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="n2_pdu_session_ACKed">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>
+
     </VARS>
 
     <FSMs>
-        <FSM label="SMF">
+        <FSM label="visited_plmn">
 
             <states>
-                <state>chf_unselected</state>
-                <state>chf_selected</state>
+                <state>no_session</state>
+                <state>session_establishment_requested</state>
+                <state>sm_context_requested</state>
+                <state>sm_context_complete</state>
+                <state>n4_session_requested</state>
+                <state>n4_session_complete</state>
+                <state>nsmf_pdu_requested</state>
+                <state>nsmf_pdu_complete</state>
+                <state>n2_pdu_requested</state>
+                <state>session_establishment_successful</state>
             </states>
 
-            <init_state>chf_unselected</init_state>
+            <init_state>no_session</init_state>
 
             
             <transitions>
-                <transition label="pdu_T1">
-                    <start>chf_unselected</start>
-                    <end>chf_selected</end>
+                <transition label="T1_T1">
+                    <start>no_session</start>
+                    <end>session_establishment_requested</end>
 
                     <condition>
-                        incoming_pdu_init &amp; pcf_provides_address
+                        pdu_session_establishment_requested
                     </condition>
 
                     <actions>
-                        <action label="select_CHF">
-                            <channel label="chan_SMF">
-                            <start> SMF </start>
-                            <end> SMF </end>
+                        <action label="establish_request">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
                             </channel>
                         </action>
-                        <action label="has_charging_identifier = TRUE">
+                        <action label="process_initiated = TRUE">
                             <channel label="internal">
-                            <start> SMF </start>
-                            <end> SMF </end>
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
                             </channel>
                         </action>
                     </actions>
                 </transition>
 
-                <transition label="pdu_T2">
-                    <start>chf_unselected</start>
-                    <end>chf_selected</end>
+                <transition label="T2_T2">
+                    <start>session_establishment_requested</start>
+                    <end>sm_context_requested</end>
 
                     <condition>
-                        incoming_pdu_init &amp; !pcf_provides_address &amp; udm_provides_characteristics
+                        process_initiated &amp; sm_context_request_success
                     </condition>
 
                     <actions>
-                        <action label="select_CHF">
-                            <channel label="chan_SMF">
-                            <start> SMF </start>
-                            <end> SMF </end>
-                        </channel>
+                        <action label="send_sm_context_request">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
                         </action>
-                        <action label="has_charging_identifier = TRUE">
+                        <action label="sm_context_request = TRUE">
                             <channel label="internal">
-                            <start> SMF </start>
-                            <end> SMF </end>
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
                             </channel>
                         </action>
                     </actions>
                 </transition>
 
-                <transition label="pdu_T3">
-                    <start>chf_unselected</start>
-                    <end>chf_unselected</end>
+                <transition label="T3_T3">
+                    <start>sm_context_requested</start>
+                    <end>sm_context_complete</end>
 
                     <condition>
-                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; !nrf_discover_requested
+                        process_initiated &amp; sm_context_request &amp; sm_context_response_success
                     </condition>
 
                     <actions>
-                        <action label="select_CHF">
-                            <channel label="chan_SMF">
-                            <start> SMF </start>
-                            <end> SMF </end>
-                        </channel>
+                        <action label="rcv_sm_context_response">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
                         </action>
-                        <action label="nrf_discover_requested = TRUE">
+                        <action label="sm_context_response = TRUE">
                             <channel label="internal">
-                            <start> SMF </start>
-                            <end> SMF </end>
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
                             </channel>
                         </action>
                     </actions>
                 </transition>
 
-                <transition label="pdu_T4">
-                    <start>chf_unselected</start>
-                    <end>chf_unselected</end>
+                <transition label="failure_T4">
+                    <start>sm_context_requested</start>
+                    <end>sm_context_requested</end>
 
                     <condition>
-                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; nrf_discover_requested &amp; !nrf_discover_completed
+                        process_initiated &amp; sm_context_request &amp; !sm_context_response_success
                     </condition>
 
                     <actions>
-                        <action label="select_CHF">
-                            <channel label="chan_SMF">
-                            <start> SMF </start>
-                            <end> SMF </end>
-                        </channel>
+                        <action label="null_action">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
                         </action>
-                        <action label="nrf_discover_completed = TRUE">
+                    </actions>
+                </transition>
+
+                <transition label="T4_T5">
+                    <start>sm_context_complete</start>
+                    <end>n4_session_requested</end>
+
+                    <condition>
+                        process_initiated &amp; sm_context_request &amp; sm_context_response &amp; n4_session_request_success
+                    </condition>
+
+                    <actions>
+                        <action label="send_n4_request">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="n4_session_request = TRUE">
                             <channel label="internal">
-                            <start> SMF </start>
-                            <end> SMF </end>
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
                             </channel>
                         </action>
                     </actions>
                 </transition>
 
-                <transition label="pdu_T5">
-                    <start>chf_unselected</start>
-                    <end>chf_selected</end>
+                <transition label="T5_T6">
+                    <start>n4_session_requested</start>
+                    <end>n4_session_complete</end>
 
                     <condition>
-                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; nrf_discover_completed &amp; nrf_discover_good
+                        process_initiated &amp; sm_context_request &amp; sm_context_response &amp; n4_session_request &amp; n4_session_response_success
                     </condition>
 
                     <actions>
-                        <action label="select_CHF">
-                            <channel label="chan_SMF">
-                            <start> SMF </start>
-                            <end> SMF </end>
-                        </channel>
+                        <action label="rcv_n4_response">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
                         </action>
-                        <action label="has_charging_identifier = TRUE">
+                        <action label="n4_session_response = TRUE">
                             <channel label="internal">
-                            <start> SMF </start>
-                            <end> SMF </end>
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
                             </channel>
                         </action>
                     </actions>
                 </transition>
 
-                <transition label="pdu_T6">
-                    <start>chf_unselected</start>
-                    <end>chf_selected</end>
+                <transition label="T6_T7">
+                    <start>n4_session_complete</start>
+                    <end>nsmf_pdu_requested</end>
 
                     <condition>
-                        incoming_pdu_init &amp; !pcf_provides_address &amp; !udm_provides_characteristics &amp; !nrf_discover_requested &amp; (nrf_discover_completed &amp; !nrf_discover_good) &amp; has_local_CHF_charactaristics
+                        process_initiated &amp; sm_context_request &amp; sm_context_response &amp; n4_session_request &amp; n4_session_response
                     </condition>
 
                     <actions>
-                        <action label="select_CHF">
-                            <channel label="chan_SMF">
-                            <start> SMF </start>
-                            <end> SMF </end>
-                        </channel>
+                        <action label="request_nsm_pdu">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
                         </action>
-                        <action label="has_charging_identifier = TRUE">
+                        <action label="nsmf_pdu_session_request = TRUE">
                             <channel label="internal">
-                            <start> SMF </start>
-                            <end> SMF </end>
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
                             </channel>
                         </action>
                     </actions>
                 </transition>
 
-                <transition label="pdu_T7">
-                    <start>chf_selected</start>
-                    <end>chf_unselected</end>
+                <transition label="T7_T8">
+                    <start>nsmf_pdu_requested</start>
+                    <end>nsmf_pdu_complete</end>
 
                     <condition>
-                        pdu_fin
+                        process_initiated &amp; sm_context_request &amp; sm_context_response &amp; n4_session_request &amp; n4_session_response &amp; nsmf_pdu_session_request &amp; nsmf_pdu_session_response_success
                     </condition>
 
                     <actions>
-                        <action label="select_CHF">
-                            <channel label="chan_SMF">
-                            <start> SMF </start>
-                            <end> SMF </end>
-                        </channel>
+                        <action label="rcv_nsm_pdu_response">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="nsmf_pdu_session_response = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
                         </action>
                     </actions>
                 </transition>
+
+                <transition label="T8_T9">
+                    <start>nsmf_pdu_complete</start>
+                    <end>n2_pdu_requested</end>
+
+                    <condition>
+                        process_initiated &amp; sm_context_request &amp; sm_context_response &amp; n4_session_request &amp; n4_session_response &amp; nsmf_pdu_session_request &amp; nsmf_pdu_session_response &amp; nsmf_message_transfer &amp; n2_pdu_session_request_success
+                    </condition>
+
+                    <actions>
+                        <action label="request_n2_pdu">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="n2_pdu_session_request = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="T9_T10">
+                    <start>n2_pdu_requested</start>
+                    <end>session_establishment_successful</end>
+
+                    <condition>
+                        process_initiated &amp; sm_context_request &amp; sm_context_response &amp; n4_session_request &amp; n4_session_response &amp; nsmf_pdu_session_request &amp; nsmf_pdu_session_response &amp; nsmf_message_transfer &amp; n2_pdu_session_request &amp; n2_pdu_session_ACKed
+                    </condition>
+
+                    <actions>
+                        <action label="n2_request_acked">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="n2_pdu_session_ACK = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
             </transitions>
 
         </FSM>
