@@ -80,6 +80,12 @@
             <fsm>visited_plmn</fsm>
         </VAR>
 
+        <VAR label="n2_sm_info">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>        
+
         <VAR label="nsmf_pdu_session_response">
             <datatype>boolean</datatype>
             <controltype>state</controltype>
@@ -100,6 +106,12 @@
             <initialvalue>FALSE</initialvalue>
         </VAR>
 
+        <VAR label="namf_success">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>        
+
         <VAR label="n2_pdu_session_request_success">
             <datatype>boolean</datatype>
             <controltype> environment </controltype>
@@ -119,6 +131,26 @@
             <fsm>visited_plmn</fsm>
         </VAR>
 
+        <VAR label="data_sent_up">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="data_done_processing">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="user_info_failure">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>
+
     </VARS>
 
     <FSMs>
@@ -133,8 +165,12 @@
                 <state>n4_session_complete</state>
                 <state>nsmf_pdu_requested</state>
                 <state>nsmf_pdu_complete</state>
+                <state>namf_message_transfer</state>
                 <state>n2_pdu_requested</state>
                 <state>session_establishment_successful</state>
+                <state>data_sent_upstream</state>
+                <state>data_processed_and_charged</state>
+                <state>data_received</state>
             </states>
 
             <init_state>no_session</init_state>
@@ -194,7 +230,7 @@
                     <end>sm_context_complete</end>
 
                     <condition>
-                        process_initiated &amp; sm_context_request &amp; sm_context_response_success
+                        sm_context_request &amp; sm_context_response_success
                     </condition>
 
                     <actions>
@@ -214,11 +250,11 @@
                 </transition>
 
                 <transition label="failure_T4">
-                    <start>sm_context_requested</start>
-                    <end>sm_context_requested</end>
+                    <start>no_session</start>
+                    <end>no_session</end>
 
                     <condition>
-                        process_initiated &amp; sm_context_request &amp; !sm_context_response_success
+                        !process_initiated
                     </condition>
 
                     <actions>
@@ -236,7 +272,7 @@
                     <end>n4_session_requested</end>
 
                     <condition>
-                        process_initiated &amp; sm_context_request &amp; sm_context_response &amp; n4_session_request_success
+                        sm_context_response &amp; n4_session_request_success
                     </condition>
 
                     <actions>
@@ -260,7 +296,7 @@
                     <end>n4_session_complete</end>
 
                     <condition>
-                        process_initiated &amp; sm_context_request &amp; sm_context_response &amp; n4_session_request &amp; n4_session_response_success
+                        n4_session_request &amp; n4_session_response_success
                     </condition>
 
                     <actions>
@@ -284,7 +320,7 @@
                     <end>nsmf_pdu_requested</end>
 
                     <condition>
-                        process_initiated &amp; sm_context_request &amp; sm_context_response &amp; n4_session_request &amp; n4_session_response
+                        n4_session_response
                     </condition>
 
                     <actions>
@@ -308,7 +344,7 @@
                     <end>nsmf_pdu_complete</end>
 
                     <condition>
-                        process_initiated &amp; sm_context_request &amp; sm_context_response &amp; n4_session_request &amp; n4_session_response &amp; nsmf_pdu_session_request &amp; nsmf_pdu_session_response_success
+                        nsmf_pdu_session_request &amp; nsmf_pdu_session_response_success
                     </condition>
 
                     <actions>
@@ -327,12 +363,36 @@
                     </actions>
                 </transition>
 
-                <transition label="T8_T9">
+                <transition label="T7_T9">
                     <start>nsmf_pdu_complete</start>
+                    <end>namf_message_transfer</end>
+
+                    <condition>
+                        nsmf_pdu_session_request &amp; nsmf_pdu_session_response_success
+                    </condition>
+
+                    <actions>
+                        <action label="rcv_nsm_pdu_response">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="nsmf_pdu_session_response = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="success_T10">
+                    <start>namf_message_transfer</start>
                     <end>n2_pdu_requested</end>
 
                     <condition>
-                        process_initiated &amp; sm_context_request &amp; sm_context_response &amp; n4_session_request &amp; n4_session_response &amp; nsmf_pdu_session_request &amp; nsmf_pdu_session_response &amp; nsmf_message_transfer &amp; n2_pdu_session_request_success
+                        nsmf_pdu_session_response &amp; nsmf_message_transfer &amp; n2_pdu_session_request_success &amp; namf_success &amp; n2_sm_info
                     </condition>
 
                     <actions>
@@ -351,12 +411,54 @@
                     </actions>
                 </transition>
 
-                <transition label="T9_T10">
+                <transition label="success_T11">
+                    <start>namf_message_transfer</start>
+                    <end>namf_message_transfer</end>
+
+                    <condition>
+                        !n2_sm_info
+                    </condition>
+
+                    <actions>
+                        <action label="no_n2_sm_info">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="failed_T12">
+                    <start>namf_message_transfer</start>
+                    <end>no_session</end>
+
+                    <condition>
+                        nsmf_pdu_session_response &amp; nsmf_message_transfer &amp; n2_pdu_session_request_success &amp; !namf_success
+                    </condition>
+
+                    <actions>
+                        <action label="request_n2_pdu">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="n2_pdu_session_request = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="T9_T13">
                     <start>n2_pdu_requested</start>
                     <end>session_establishment_successful</end>
 
                     <condition>
-                        process_initiated &amp; sm_context_request &amp; sm_context_response &amp; n4_session_request &amp; n4_session_response &amp; nsmf_pdu_session_request &amp; nsmf_pdu_session_response &amp; nsmf_message_transfer &amp; n2_pdu_session_request &amp; n2_pdu_session_ACKed
+                        n2_pdu_session_request &amp; n2_pdu_session_ACKed
                     </condition>
 
                     <actions>
@@ -368,6 +470,90 @@
                         </action>
                         <action label="n2_pdu_session_ACK = TRUE">
                             <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="data_T14">
+                    <start>session_establishment_successful</start>
+                    <end>data_sent_upstream</end>
+
+                    <condition>
+                        n2_pdu_session_ACK
+                    </condition>
+
+                    <actions>
+                        <action label="data_sent">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="data_sent_up = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="data_T15">
+                    <start>data_sent_upstream</start>
+                    <end>data_processed_and_charged</end>
+
+                    <condition>
+                        data_sent_up
+                    </condition>
+
+                    <actions>
+                        <action label="data_processing">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="data_done_processing = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="user_T16">
+                    <start>data_processed_and_charged</start>
+                    <end>data_received</end>
+
+                    <condition>
+                        data_done_processing &amp; !user_info_failure
+                    </condition>
+
+                    <actions>
+                        <action label="data_process_good">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="late_T17">
+                    <start>data_processed_and_charged</start>
+                    <end>no_session</end>
+
+                    <condition>
+                        user_info_failure
+                    </condition>
+
+                    <actions>
+                        <action label="data_processing_fail">
+                            <channel label="PLMN">
                             <start> visited_plmn </start>
                             <end> visited_plmn </end>
                             </channel>

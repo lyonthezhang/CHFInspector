@@ -9,8 +9,12 @@ node [shape = circle, label="n4_session_requested"]n4_session_requested;
 node [shape = circle, label="n4_session_complete"]n4_session_complete;
 node [shape = circle, label="nsmf_pdu_requested"]nsmf_pdu_requested;
 node [shape = circle, label="nsmf_pdu_complete"]nsmf_pdu_complete;
+node [shape = circle, label="namf_message_transfer"]namf_message_transfer;
 node [shape = circle, label="n2_pdu_requested"]n2_pdu_requested;
 node [shape = circle, label="session_establishment_successful"]session_establishment_successful;
+node [shape = circle, label="data_sent_upstream"]data_sent_upstream;
+node [shape = circle, label="data_processed_and_charged"]data_processed_and_charged;
+node [shape = circle, label="data_received"]data_received;
 no_session -> session_establishment_requested [label = "T1_T1: 
                         pdu_session_establishment_requested
                     /
@@ -20,35 +24,63 @@ session_establishment_requested -> sm_context_requested [label = "T2_T2:
                     /
 send_sm_context_request, sm_context_request = TRUE"]
 sm_context_requested -> sm_context_complete [label = "T3_T3: 
-                        process_initiated & sm_context_request & sm_context_response_success
+                        sm_context_request & sm_context_response_success
                     /
 rcv_sm_context_response, sm_context_response = TRUE"]
-sm_context_requested -> sm_context_requested [label = "failure_T4: 
-                        process_initiated & sm_context_request & !sm_context_response_success
+no_session -> no_session [label = "failure_T4: 
+                        !process_initiated
                     /
 null_action"]
 sm_context_complete -> n4_session_requested [label = "T4_T5: 
-                        process_initiated & sm_context_request & sm_context_response & n4_session_request_success
+                        sm_context_response & n4_session_request_success
                     /
 send_n4_request, n4_session_request = TRUE"]
 n4_session_requested -> n4_session_complete [label = "T5_T6: 
-                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response_success
+                        n4_session_request & n4_session_response_success
                     /
 rcv_n4_response, n4_session_response = TRUE"]
 n4_session_complete -> nsmf_pdu_requested [label = "T6_T7: 
-                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response
+                        n4_session_response
                     /
 request_nsm_pdu, nsmf_pdu_session_request = TRUE"]
 nsmf_pdu_requested -> nsmf_pdu_complete [label = "T7_T8: 
-                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response & nsmf_pdu_session_request & nsmf_pdu_session_response_success
+                        nsmf_pdu_session_request & nsmf_pdu_session_response_success
                     /
 rcv_nsm_pdu_response, nsmf_pdu_session_response = TRUE"]
-nsmf_pdu_complete -> n2_pdu_requested [label = "T8_T9: 
-                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response & nsmf_pdu_session_request & nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request_success
+nsmf_pdu_complete -> namf_message_transfer [label = "T7_T9: 
+                        nsmf_pdu_session_request & nsmf_pdu_session_response_success
+                    /
+rcv_nsm_pdu_response, nsmf_pdu_session_response = TRUE"]
+namf_message_transfer -> n2_pdu_requested [label = "success_T10: 
+                        nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request_success & namf_success & n2_sm_info
                     /
 request_n2_pdu, n2_pdu_session_request = TRUE"]
-n2_pdu_requested -> session_establishment_successful [label = "T9_T10: 
-                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response & nsmf_pdu_session_request & nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request & n2_pdu_session_ACKed
+namf_message_transfer -> namf_message_transfer [label = "success_T11: 
+                        !n2_sm_info
+                    /
+no_n2_sm_info"]
+namf_message_transfer -> no_session [label = "failed_T12: 
+                        nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request_success & !namf_success
+                    /
+request_n2_pdu, n2_pdu_session_request = TRUE"]
+n2_pdu_requested -> session_establishment_successful [label = "T9_T13: 
+                        n2_pdu_session_request & n2_pdu_session_ACKed
                     /
 n2_request_acked, n2_pdu_session_ACK = TRUE"]
+session_establishment_successful -> data_sent_upstream [label = "data_T14: 
+                        n2_pdu_session_ACK
+                    /
+data_sent, data_sent_up = TRUE"]
+data_sent_upstream -> data_processed_and_charged [label = "data_T15: 
+                        data_sent_up
+                    /
+data_processing, data_done_processing = TRUE"]
+data_processed_and_charged -> data_received [label = "user_T16: 
+                        data_done_processing & !user_info_failure
+                    /
+data_process_good"]
+data_processed_and_charged -> no_session [label = "late_T17: 
+                        user_info_failure
+                    /
+data_processing_fail"]
 }

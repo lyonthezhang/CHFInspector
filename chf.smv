@@ -16,12 +16,17 @@ n4_session_response	:	boolean;
 n4_session_response_success	:	boolean;	
 nsmf_pdu_session_request	:	boolean;	
 nsmf_pdu_session_response_success	:	boolean;	
+n2_sm_info	:	boolean;	
 nsmf_pdu_session_response	:	boolean;	
 nsmf_message_transfer	:	boolean;	
 n2_pdu_session_request	:	boolean;	
+namf_success	:	boolean;	
 n2_pdu_session_request_success	:	boolean;	
 n2_pdu_session_ACK	:	boolean;	
 n2_pdu_session_ACKed	:	boolean;	
+data_sent_up	:	boolean;	
+data_done_processing	:	boolean;	
+user_info_failure	:	boolean;	
 
 ----------------- Sequence numbers -------------------
 
@@ -37,8 +42,12 @@ visited_plmn_state	:
 	n4_session_complete,
 	nsmf_pdu_requested,
 	nsmf_pdu_complete,
+	namf_message_transfer,
 	n2_pdu_requested,
-	session_establishment_successful
+	session_establishment_successful,
+	data_sent_upstream,
+	data_processed_and_charged,
+	data_received
 };
 ------------ Possible visited_plmn actions ----------------
 
@@ -53,7 +62,12 @@ visited_plmn_action	:
 	visited_plmn_request_nsm_pdu,
 	visited_plmn_rcv_nsm_pdu_response,
 	visited_plmn_request_n2_pdu,
-	visited_plmn_n2_request_acked
+	visited_plmn_no_n2_sm_info,
+	visited_plmn_n2_request_acked,
+	visited_plmn_data_sent,
+	visited_plmn_data_processing,
+	visited_plmn_data_process_good,
+	visited_plmn_data_processing_fail
 };
 
 
@@ -67,28 +81,49 @@ T2_T2	:=	 (visited_plmn_state = session_establishment_requested &
                         process_initiated & sm_context_request_success
                     )	;
 T3_T3	:=	 (visited_plmn_state = sm_context_requested & 
-                        process_initiated & sm_context_request & sm_context_response_success
+                        sm_context_request & sm_context_response_success
                     )	;
-failure_T4	:=	 (visited_plmn_state = sm_context_requested & 
-                        process_initiated & sm_context_request & !sm_context_response_success
+failure_T4	:=	 (visited_plmn_state = no_session & 
+                        !process_initiated
                     )	;
 T4_T5	:=	 (visited_plmn_state = sm_context_complete & 
-                        process_initiated & sm_context_request & sm_context_response & n4_session_request_success
+                        sm_context_response & n4_session_request_success
                     )	;
 T5_T6	:=	 (visited_plmn_state = n4_session_requested & 
-                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response_success
+                        n4_session_request & n4_session_response_success
                     )	;
 T6_T7	:=	 (visited_plmn_state = n4_session_complete & 
-                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response
+                        n4_session_response
                     )	;
 T7_T8	:=	 (visited_plmn_state = nsmf_pdu_requested & 
-                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response & nsmf_pdu_session_request & nsmf_pdu_session_response_success
+                        nsmf_pdu_session_request & nsmf_pdu_session_response_success
                     )	;
-T8_T9	:=	 (visited_plmn_state = nsmf_pdu_complete & 
-                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response & nsmf_pdu_session_request & nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request_success
+T7_T9	:=	 (visited_plmn_state = nsmf_pdu_complete & 
+                        nsmf_pdu_session_request & nsmf_pdu_session_response_success
                     )	;
-T9_T10	:=	 (visited_plmn_state = n2_pdu_requested & 
-                        process_initiated & sm_context_request & sm_context_response & n4_session_request & n4_session_response & nsmf_pdu_session_request & nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request & n2_pdu_session_ACKed
+success_T10	:=	 (visited_plmn_state = namf_message_transfer & 
+                        nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request_success & namf_success & n2_sm_info
+                    )	;
+success_T11	:=	 (visited_plmn_state = namf_message_transfer & 
+                        !n2_sm_info
+                    )	;
+failed_T12	:=	 (visited_plmn_state = namf_message_transfer & 
+                        nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request_success & !namf_success
+                    )	;
+T9_T13	:=	 (visited_plmn_state = n2_pdu_requested & 
+                        n2_pdu_session_request & n2_pdu_session_ACKed
+                    )	;
+data_T14	:=	 (visited_plmn_state = session_establishment_successful & 
+                        n2_pdu_session_ACK
+                    )	;
+data_T15	:=	 (visited_plmn_state = data_sent_upstream & 
+                        data_sent_up
+                    )	;
+user_T16	:=	 (visited_plmn_state = data_processed_and_charged & 
+                        data_done_processing & !user_info_failure
+                    )	;
+late_T17	:=	 (visited_plmn_state = data_processed_and_charged & 
+                        user_info_failure
                     )	;
 
 ------------------- Noisy Channels --------------------
@@ -108,15 +143,20 @@ init(visited_plmn_state)	:=no_session;
 
 next(visited_plmn_state)	:=	 case
 
+(failure_T4 | failed_T12 | late_T17 )	:	no_session	;
 (T1_T1 )	:	session_establishment_requested	;
-(T2_T2 | failure_T4 )	:	sm_context_requested	;
+(T2_T2 )	:	sm_context_requested	;
 (T3_T3 )	:	sm_context_complete	;
 (T4_T5 )	:	n4_session_requested	;
 (T5_T6 )	:	n4_session_complete	;
 (T6_T7 )	:	nsmf_pdu_requested	;
 (T7_T8 )	:	nsmf_pdu_complete	;
-(T8_T9 )	:	n2_pdu_requested	;
-(T9_T10 )	:	session_establishment_successful	;
+(T7_T9 | success_T11 )	:	namf_message_transfer	;
+(success_T10 )	:	n2_pdu_requested	;
+(T9_T13 )	:	session_establishment_successful	;
+(data_T14 )	:	data_sent_upstream	;
+(data_T15 )	:	data_processed_and_charged	;
+(user_T16 )	:	data_received	;
 TRUE	:	visited_plmn_state	;
 esac	;
 
@@ -132,9 +172,14 @@ next(visited_plmn_action)	:=	 case
 (T4_T5 )	:	visited_plmn_send_n4_request	;
 (T5_T6 )	:	visited_plmn_rcv_n4_response	;
 (T6_T7 )	:	visited_plmn_request_nsm_pdu	;
-(T7_T8 )	:	visited_plmn_rcv_nsm_pdu_response	;
-(T8_T9 )	:	visited_plmn_request_n2_pdu	;
-(T9_T10 )	:	visited_plmn_n2_request_acked	;
+(T7_T8 | T7_T9 )	:	visited_plmn_rcv_nsm_pdu_response	;
+(success_T10 | failed_T12 )	:	visited_plmn_request_n2_pdu	;
+(success_T11 )	:	visited_plmn_no_n2_sm_info	;
+(T9_T13 )	:	visited_plmn_n2_request_acked	;
+(data_T14 )	:	visited_plmn_data_sent	;
+(data_T15 )	:	visited_plmn_data_processing	;
+(user_T16 )	:	visited_plmn_data_process_good	;
+(late_T17 )	:	visited_plmn_data_processing_fail	;
 TRUE	:	visited_plmn_null_action	;
 esac	;
 
@@ -196,7 +241,7 @@ esac	;
 init(nsmf_pdu_session_response)	:= FALSE	;
 
 next(nsmf_pdu_session_response)	:=	 case
-(T7_T8 )	:	TRUE	;
+(T7_T8 | T7_T9 )	:	TRUE	;
 TRUE	:	nsmf_pdu_session_response	;
 esac	;
 
@@ -205,7 +250,7 @@ esac	;
 init(n2_pdu_session_request)	:= FALSE	;
 
 next(n2_pdu_session_request)	:=	 case
-(T8_T9 )	:	TRUE	;
+(success_T10 | failed_T12 )	:	TRUE	;
 TRUE	:	n2_pdu_session_request	;
 esac	;
 
@@ -214,13 +259,26 @@ esac	;
 init(n2_pdu_session_ACK)	:= FALSE	;
 
 next(n2_pdu_session_ACK)	:=	 case
-(T9_T10 )	:	TRUE	;
+(T9_T13 )	:	TRUE	;
 TRUE	:	n2_pdu_session_ACK	;
 esac	;
 
 
---- The process begins once the request for it is issued.
-LTLSPEC process_initiated -> O(pdu_session_establishment_requested)
 
---- Purposely wrong. Says that a message will get a response if it's issued.
-LTLSPEC sm_context_request -> (n4_session_request & !n4_session_request)
+init(data_sent_up)	:= FALSE	;
+
+next(data_sent_up)	:=	 case
+(data_T14 )	:	TRUE	;
+TRUE	:	data_sent_up	;
+esac	;
+
+
+
+init(data_done_processing)	:= FALSE	;
+
+next(data_done_processing)	:=	 case
+(data_T15 )	:	TRUE	;
+TRUE	:	data_done_processing	;
+esac	;
+
+
