@@ -1,0 +1,8 @@
+--- PROPERTY 1: If the data is sent upstream by UE, it will receive a response.
+LTLSPEC G((data_sent_up) -> F(data_received_ue));
+
+--- PROPERTY 2: If the session is successfully established, the UE will get data
+LTLSPEC G((n2_pdu_session_ACK) -> F(data_received_ue));
+
+--- PROPERTY 3: If a release is requested, then the UE will eventually see the command to release
+LTLSPEC G((release_initiated) -> F(release_command_issued));

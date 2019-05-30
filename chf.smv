@@ -27,6 +27,21 @@ n2_pdu_session_ACKed	:	boolean;
 data_sent_up	:	boolean;	
 data_done_processing	:	boolean;	
 user_info_failure	:	boolean;	
+data_received_ue	:	boolean;	
+release_initiated	:	boolean;	
+pdu_release_requested	:	boolean;	
+home_plmn_release_response	:	boolean;	
+home_plmn_info	:	boolean;	
+n2_sm_resource	:	boolean;	
+n2_resource_release_request	:	boolean;	
+release_command_issued	:	boolean;	
+pdu_update_sm_context	:	boolean;	
+vsmf_release_response	:	boolean;	
+hsmf_policy_release	:	boolean;	
+hsmf_context_removal	:	boolean;	
+ue_initiated_release	:	boolean;	
+pdu_session_released	:	boolean;	
+case_3_activation	:	boolean;	
 
 ----------------- Sequence numbers -------------------
 
@@ -47,12 +62,22 @@ visited_plmn_state	:
 	session_establishment_successful,
 	data_sent_upstream,
 	data_processed_and_charged,
-	data_received
+	normal_session,
+	session_release,
+	home_response,
+	n2_resource,
+	ue_received_release,
+	pdu_update_sm,
+	vsmf_release,
+	hsmf_policy_removal,
+	hsmf_context_release
 };
 ------------ Possible visited_plmn actions ----------------
 
 visited_plmn_action	:
 {
+	visited_plmn_fork,
+	visited_plmn_starting_release,
 	visited_plmn_establish_request,
 	visited_plmn_send_sm_context_request,
 	visited_plmn_rcv_sm_context_response,
@@ -74,55 +99,91 @@ visited_plmn_action	:
 DEFINE
 
 -----------------visited_plmn transitions --------------------
-T1_T1	:=	 (visited_plmn_state = no_session & 
+release_T1	:=	 (visited_plmn_state = vsmf_release & 
+                        ue_initiated_release
+                    )	;
+release_T2	:=	 (visited_plmn_state = ue_received_release & 
+                        case_3_activation
+                    )	;
+release_T3	:=	 (visited_plmn_state = home_response & 
+                        n2_sm_resource
+                    )	;
+release_T4	:=	 (visited_plmn_state = hsmf_context_release & 
+                        pdu_session_released
+                    )	;
+release_T5	:=	 (visited_plmn_state = hsmf_policy_removal & 
+                        hsmf_context_removal
+                    )	;
+release_T6	:=	 (visited_plmn_state = vsmf_release & 
+                        hsmf_policy_release
+                    )	;
+release_T7	:=	 (visited_plmn_state = pdu_update_sm & 
+                        vsmf_release_response
+                    )	;
+release_T8	:=	 (visited_plmn_state = ue_received_release & 
+                        pdu_update_sm_context
+                    )	;
+release_T9	:=	 (visited_plmn_state = n2_resource & 
+                        release_command_issued
+                    )	;
+release_T10	:=	 (visited_plmn_state = home_response & 
+                        n2_resource_release_request & !n2_sm_resource
+                    )	;
+release_T11	:=	 (visited_plmn_state = session_release & 
+                        home_plmn_release_response & home_plmn_release_response
+                    )	;
+release_T12	:=	 (visited_plmn_state = normal_session & 
+                        pdu_release_requested
+                    )	;
+T1_T13	:=	 (visited_plmn_state = no_session & 
                         pdu_session_establishment_requested
                     )	;
-T2_T2	:=	 (visited_plmn_state = session_establishment_requested & 
+T2_T14	:=	 (visited_plmn_state = session_establishment_requested & 
                         process_initiated & sm_context_request_success
                     )	;
-T3_T3	:=	 (visited_plmn_state = sm_context_requested & 
+T3_T15	:=	 (visited_plmn_state = sm_context_requested & 
                         sm_context_request & sm_context_response_success
                     )	;
-failure_T4	:=	 (visited_plmn_state = no_session & 
+failure_T16	:=	 (visited_plmn_state = no_session & 
                         !process_initiated
                     )	;
-T4_T5	:=	 (visited_plmn_state = sm_context_complete & 
+T4_T17	:=	 (visited_plmn_state = sm_context_complete & 
                         sm_context_response & n4_session_request_success
                     )	;
-T5_T6	:=	 (visited_plmn_state = n4_session_requested & 
+T5_T18	:=	 (visited_plmn_state = n4_session_requested & 
                         n4_session_request & n4_session_response_success
                     )	;
-T6_T7	:=	 (visited_plmn_state = n4_session_complete & 
+T6_T19	:=	 (visited_plmn_state = n4_session_complete & 
                         n4_session_response
                     )	;
-T7_T8	:=	 (visited_plmn_state = nsmf_pdu_requested & 
+T7_T20	:=	 (visited_plmn_state = nsmf_pdu_requested & 
                         nsmf_pdu_session_request & nsmf_pdu_session_response_success
                     )	;
-T7_T9	:=	 (visited_plmn_state = nsmf_pdu_complete & 
+T7_T21	:=	 (visited_plmn_state = nsmf_pdu_complete & 
                         nsmf_pdu_session_request & nsmf_pdu_session_response_success
                     )	;
-success_T10	:=	 (visited_plmn_state = namf_message_transfer & 
+success_T22	:=	 (visited_plmn_state = namf_message_transfer & 
                         nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request_success & namf_success & n2_sm_info
                     )	;
-success_T11	:=	 (visited_plmn_state = namf_message_transfer & 
+success_T23	:=	 (visited_plmn_state = session_establishment_successful & 
                         !n2_sm_info
                     )	;
-failed_T12	:=	 (visited_plmn_state = namf_message_transfer & 
+failed_T24	:=	 (visited_plmn_state = namf_message_transfer & 
                         nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request_success & !namf_success
                     )	;
-T9_T13	:=	 (visited_plmn_state = n2_pdu_requested & 
+T9_T25	:=	 (visited_plmn_state = n2_pdu_requested & 
                         n2_pdu_session_request & n2_pdu_session_ACKed
                     )	;
-data_T14	:=	 (visited_plmn_state = session_establishment_successful & 
+data_T26	:=	 (visited_plmn_state = session_establishment_successful & 
                         n2_pdu_session_ACK
                     )	;
-data_T15	:=	 (visited_plmn_state = data_sent_upstream & 
+data_T27	:=	 (visited_plmn_state = data_sent_upstream & 
                         data_sent_up
                     )	;
-user_T16	:=	 (visited_plmn_state = data_processed_and_charged & 
+user_T28	:=	 (visited_plmn_state = data_processed_and_charged & 
                         data_done_processing & !user_info_failure
                     )	;
-late_T17	:=	 (visited_plmn_state = data_processed_and_charged & 
+late_T29	:=	 (visited_plmn_state = data_processed_and_charged & 
                         user_info_failure
                     )	;
 
@@ -143,20 +204,28 @@ init(visited_plmn_state)	:=no_session;
 
 next(visited_plmn_state)	:=	 case
 
-(failure_T4 | failed_T12 | late_T17 )	:	no_session	;
-(T1_T1 )	:	session_establishment_requested	;
-(T2_T2 )	:	sm_context_requested	;
-(T3_T3 )	:	sm_context_complete	;
-(T4_T5 )	:	n4_session_requested	;
-(T5_T6 )	:	n4_session_complete	;
-(T6_T7 )	:	nsmf_pdu_requested	;
-(T7_T8 )	:	nsmf_pdu_complete	;
-(T7_T9 | success_T11 )	:	namf_message_transfer	;
-(success_T10 )	:	n2_pdu_requested	;
-(T9_T13 )	:	session_establishment_successful	;
-(data_T14 )	:	data_sent_upstream	;
-(data_T15 )	:	data_processed_and_charged	;
-(user_T16 )	:	data_received	;
+(release_T4 | failure_T16 | failed_T24 | late_T29 )	:	no_session	;
+(T1_T13 )	:	session_establishment_requested	;
+(T2_T14 )	:	sm_context_requested	;
+(T3_T15 )	:	sm_context_complete	;
+(T4_T17 )	:	n4_session_requested	;
+(T5_T18 )	:	n4_session_complete	;
+(T6_T19 )	:	nsmf_pdu_requested	;
+(T7_T20 )	:	nsmf_pdu_complete	;
+(T7_T21 )	:	namf_message_transfer	;
+(success_T22 )	:	n2_pdu_requested	;
+(success_T23 | T9_T25 )	:	session_establishment_successful	;
+(data_T26 )	:	data_sent_upstream	;
+(data_T27 )	:	data_processed_and_charged	;
+(user_T28 )	:	normal_session	;
+(release_T12 )	:	session_release	;
+(release_T11 )	:	home_response	;
+(release_T10 )	:	n2_resource	;
+(release_T9 )	:	ue_received_release	;
+(release_T8 )	:	pdu_update_sm	;
+(release_T2 | release_T3 | release_T7 )	:	vsmf_release	;
+(release_T6 )	:	hsmf_policy_removal	;
+(release_T1 | release_T5 )	:	hsmf_context_release	;
 TRUE	:	visited_plmn_state	;
 esac	;
 
@@ -165,21 +234,23 @@ init(visited_plmn_action)	:= visited_plmn_null_action	;
 
 next(visited_plmn_action)	:=	 case
 
-(T1_T1 )	:	visited_plmn_establish_request	;
-(T2_T2 )	:	visited_plmn_send_sm_context_request	;
-(T3_T3 )	:	visited_plmn_rcv_sm_context_response	;
-(failure_T4 )	:	visited_plmn_null_action	;
-(T4_T5 )	:	visited_plmn_send_n4_request	;
-(T5_T6 )	:	visited_plmn_rcv_n4_response	;
-(T6_T7 )	:	visited_plmn_request_nsm_pdu	;
-(T7_T8 | T7_T9 )	:	visited_plmn_rcv_nsm_pdu_response	;
-(success_T10 | failed_T12 )	:	visited_plmn_request_n2_pdu	;
-(success_T11 )	:	visited_plmn_no_n2_sm_info	;
-(T9_T13 )	:	visited_plmn_n2_request_acked	;
-(data_T14 )	:	visited_plmn_data_sent	;
-(data_T15 )	:	visited_plmn_data_processing	;
-(user_T16 )	:	visited_plmn_data_process_good	;
-(late_T17 )	:	visited_plmn_data_processing_fail	;
+(release_T1 | release_T2 | release_T3 | release_T4 | release_T5 | release_T6 | release_T7 | release_T8 | release_T9 | release_T10 | release_T11 )	:	visited_plmn_fork	;
+(release_T12 )	:	visited_plmn_starting_release	;
+(T1_T13 )	:	visited_plmn_establish_request	;
+(T2_T14 )	:	visited_plmn_send_sm_context_request	;
+(T3_T15 )	:	visited_plmn_rcv_sm_context_response	;
+(failure_T16 )	:	visited_plmn_null_action	;
+(T4_T17 )	:	visited_plmn_send_n4_request	;
+(T5_T18 )	:	visited_plmn_rcv_n4_response	;
+(T6_T19 )	:	visited_plmn_request_nsm_pdu	;
+(T7_T20 | T7_T21 )	:	visited_plmn_rcv_nsm_pdu_response	;
+(success_T22 | failed_T24 )	:	visited_plmn_request_n2_pdu	;
+(success_T23 )	:	visited_plmn_no_n2_sm_info	;
+(T9_T25 )	:	visited_plmn_n2_request_acked	;
+(data_T26 )	:	visited_plmn_data_sent	;
+(data_T27 )	:	visited_plmn_data_processing	;
+(user_T28 )	:	visited_plmn_data_process_good	;
+(late_T29 )	:	visited_plmn_data_processing_fail	;
 TRUE	:	visited_plmn_null_action	;
 esac	;
 
@@ -187,7 +258,7 @@ esac	;
 init(process_initiated)	:= FALSE	;
 
 next(process_initiated)	:=	 case
-(T1_T1 )	:	TRUE	;
+(T1_T13 )	:	TRUE	;
 TRUE	:	process_initiated	;
 esac	;
 
@@ -196,7 +267,7 @@ esac	;
 init(sm_context_request)	:= FALSE	;
 
 next(sm_context_request)	:=	 case
-(T2_T2 )	:	TRUE	;
+(T2_T14 )	:	TRUE	;
 TRUE	:	sm_context_request	;
 esac	;
 
@@ -205,7 +276,7 @@ esac	;
 init(sm_context_response)	:= FALSE	;
 
 next(sm_context_response)	:=	 case
-(T3_T3 )	:	TRUE	;
+(T3_T15 )	:	TRUE	;
 TRUE	:	sm_context_response	;
 esac	;
 
@@ -214,7 +285,7 @@ esac	;
 init(n4_session_request)	:= FALSE	;
 
 next(n4_session_request)	:=	 case
-(T4_T5 )	:	TRUE	;
+(T4_T17 )	:	TRUE	;
 TRUE	:	n4_session_request	;
 esac	;
 
@@ -223,7 +294,7 @@ esac	;
 init(n4_session_response)	:= FALSE	;
 
 next(n4_session_response)	:=	 case
-(T5_T6 )	:	TRUE	;
+(T5_T18 )	:	TRUE	;
 TRUE	:	n4_session_response	;
 esac	;
 
@@ -232,7 +303,7 @@ esac	;
 init(nsmf_pdu_session_request)	:= FALSE	;
 
 next(nsmf_pdu_session_request)	:=	 case
-(T6_T7 )	:	TRUE	;
+(T6_T19 )	:	TRUE	;
 TRUE	:	nsmf_pdu_session_request	;
 esac	;
 
@@ -241,7 +312,7 @@ esac	;
 init(nsmf_pdu_session_response)	:= FALSE	;
 
 next(nsmf_pdu_session_response)	:=	 case
-(T7_T8 | T7_T9 )	:	TRUE	;
+(T7_T20 | T7_T21 )	:	TRUE	;
 TRUE	:	nsmf_pdu_session_response	;
 esac	;
 
@@ -250,7 +321,7 @@ esac	;
 init(n2_pdu_session_request)	:= FALSE	;
 
 next(n2_pdu_session_request)	:=	 case
-(success_T10 | failed_T12 )	:	TRUE	;
+(success_T22 | failed_T24 )	:	TRUE	;
 TRUE	:	n2_pdu_session_request	;
 esac	;
 
@@ -259,7 +330,7 @@ esac	;
 init(n2_pdu_session_ACK)	:= FALSE	;
 
 next(n2_pdu_session_ACK)	:=	 case
-(T9_T13 )	:	TRUE	;
+(T9_T25 )	:	TRUE	;
 TRUE	:	n2_pdu_session_ACK	;
 esac	;
 
@@ -268,7 +339,7 @@ esac	;
 init(data_sent_up)	:= FALSE	;
 
 next(data_sent_up)	:=	 case
-(data_T14 )	:	TRUE	;
+(data_T26 )	:	TRUE	;
 TRUE	:	data_sent_up	;
 esac	;
 
@@ -277,8 +348,88 @@ esac	;
 init(data_done_processing)	:= FALSE	;
 
 next(data_done_processing)	:=	 case
-(data_T15 )	:	TRUE	;
+(data_T27 )	:	TRUE	;
 TRUE	:	data_done_processing	;
 esac	;
 
 
+
+init(data_received_ue)	:= FALSE	;
+
+next(data_received_ue)	:=	 case
+(user_T28 )	:	TRUE	;
+TRUE	:	data_received_ue	;
+esac	;
+
+
+
+init(n2_resource_release_request)	:= FALSE	;
+
+next(n2_resource_release_request)	:=	 case
+(release_T11 )	:	TRUE	;
+TRUE	:	n2_resource_release_request	;
+esac	;
+
+
+
+init(release_command_issued)	:= FALSE	;
+
+next(release_command_issued)	:=	 case
+(release_T10 )	:	TRUE	;
+TRUE	:	release_command_issued	;
+esac	;
+
+
+
+init(pdu_update_sm_context)	:= FALSE	;
+
+next(pdu_update_sm_context)	:=	 case
+(release_T9 )	:	TRUE	;
+TRUE	:	pdu_update_sm_context	;
+esac	;
+
+
+
+init(vsmf_release_response)	:= FALSE	;
+
+next(vsmf_release_response)	:=	 case
+(release_T8 )	:	TRUE	;
+TRUE	:	vsmf_release_response	;
+esac	;
+
+
+
+init(hsmf_policy_release)	:= FALSE	;
+
+next(hsmf_policy_release)	:=	 case
+(release_T2 | release_T3 | release_T7 )	:	TRUE	;
+TRUE	:	hsmf_policy_release	;
+esac	;
+
+
+
+init(hsmf_context_removal)	:= FALSE	;
+
+next(hsmf_context_removal)	:=	 case
+(release_T1 | release_T6 )	:	TRUE	;
+TRUE	:	hsmf_context_removal	;
+esac	;
+
+
+
+init(pdu_session_released)	:= FALSE	;
+
+next(pdu_session_released)	:=	 case
+(release_T5 )	:	TRUE	;
+TRUE	:	pdu_session_released	;
+esac	;
+
+
+--- PROPERTY 1: If the data is sent upstream by UE, it will receive a response.
+LTLSPEC G((data_sent_up) -> F(data_received_ue));
+
+--- PROPERTY 2: If the session is successfully established, the UE will get data
+LTLSPEC G((n2_pdu_session_ACK) -> F(data_received_ue));
+
+--- PROPERTY 3: If a release is requested, then the UE will eventually see the command to release
+LTLSPEC G((release_initiated) -> F(release_command_issued));

@@ -14,72 +14,128 @@ node [shape = circle, label="n2_pdu_requested"]n2_pdu_requested;
 node [shape = circle, label="session_establishment_successful"]session_establishment_successful;
 node [shape = circle, label="data_sent_upstream"]data_sent_upstream;
 node [shape = circle, label="data_processed_and_charged"]data_processed_and_charged;
-node [shape = circle, label="data_received"]data_received;
-no_session -> session_establishment_requested [label = "T1_T1: 
+node [shape = circle, label="normal_session"]normal_session;
+node [shape = circle, label="session_release"]session_release;
+node [shape = circle, label="home_response"]home_response;
+node [shape = circle, label="n2_resource"]n2_resource;
+node [shape = circle, label="ue_received_release"]ue_received_release;
+node [shape = circle, label="pdu_update_sm"]pdu_update_sm;
+node [shape = circle, label="vsmf_release"]vsmf_release;
+node [shape = circle, label="hsmf_policy_removal"]hsmf_policy_removal;
+node [shape = circle, label="hsmf_context_release"]hsmf_context_release;
+vsmf_release -> hsmf_context_release [label = "release_T1: 
+                        ue_initiated_release
+                    /
+fork, hsmf_context_removal = TRUE"]
+ue_received_release -> vsmf_release [label = "release_T2: 
+                        case_3_activation
+                    /
+fork, hsmf_policy_release = TRUE"]
+home_response -> vsmf_release [label = "release_T3: 
+                        n2_sm_resource
+                    /
+fork, hsmf_policy_release = TRUE"]
+hsmf_context_release -> no_session [label = "release_T4: 
+                        pdu_session_released
+                    /
+fork"]
+hsmf_policy_removal -> hsmf_context_release [label = "release_T5: 
+                        hsmf_context_removal
+                    /
+fork, pdu_session_released = TRUE"]
+vsmf_release -> hsmf_policy_removal [label = "release_T6: 
+                        hsmf_policy_release
+                    /
+fork, hsmf_context_removal = TRUE"]
+pdu_update_sm -> vsmf_release [label = "release_T7: 
+                        vsmf_release_response
+                    /
+fork, hsmf_policy_release = TRUE"]
+ue_received_release -> pdu_update_sm [label = "release_T8: 
+                        pdu_update_sm_context
+                    /
+fork, vsmf_release_response = TRUE"]
+n2_resource -> ue_received_release [label = "release_T9: 
+                        release_command_issued
+                    /
+fork, pdu_update_sm_context = TRUE"]
+home_response -> n2_resource [label = "release_T10: 
+                        n2_resource_release_request & !n2_sm_resource
+                    /
+fork, release_command_issued = TRUE"]
+session_release -> home_response [label = "release_T11: 
+                        home_plmn_release_response & home_plmn_release_response
+                    /
+fork, n2_resource_release_request = TRUE"]
+normal_session -> session_release [label = "release_T12: 
+                        pdu_release_requested
+                    /
+starting_release, home_plmn_release_response = TRUE"]
+no_session -> session_establishment_requested [label = "T1_T13: 
                         pdu_session_establishment_requested
                     /
 establish_request, process_initiated = TRUE"]
-session_establishment_requested -> sm_context_requested [label = "T2_T2: 
+session_establishment_requested -> sm_context_requested [label = "T2_T14: 
                         process_initiated & sm_context_request_success
                     /
 send_sm_context_request, sm_context_request = TRUE"]
-sm_context_requested -> sm_context_complete [label = "T3_T3: 
+sm_context_requested -> sm_context_complete [label = "T3_T15: 
                         sm_context_request & sm_context_response_success
                     /
 rcv_sm_context_response, sm_context_response = TRUE"]
-no_session -> no_session [label = "failure_T4: 
+no_session -> no_session [label = "failure_T16: 
                         !process_initiated
                     /
 null_action"]
-sm_context_complete -> n4_session_requested [label = "T4_T5: 
+sm_context_complete -> n4_session_requested [label = "T4_T17: 
                         sm_context_response & n4_session_request_success
                     /
 send_n4_request, n4_session_request = TRUE"]
-n4_session_requested -> n4_session_complete [label = "T5_T6: 
+n4_session_requested -> n4_session_complete [label = "T5_T18: 
                         n4_session_request & n4_session_response_success
                     /
 rcv_n4_response, n4_session_response = TRUE"]
-n4_session_complete -> nsmf_pdu_requested [label = "T6_T7: 
+n4_session_complete -> nsmf_pdu_requested [label = "T6_T19: 
                         n4_session_response
                     /
 request_nsm_pdu, nsmf_pdu_session_request = TRUE"]
-nsmf_pdu_requested -> nsmf_pdu_complete [label = "T7_T8: 
+nsmf_pdu_requested -> nsmf_pdu_complete [label = "T7_T20: 
                         nsmf_pdu_session_request & nsmf_pdu_session_response_success
                     /
 rcv_nsm_pdu_response, nsmf_pdu_session_response = TRUE"]
-nsmf_pdu_complete -> namf_message_transfer [label = "T7_T9: 
+nsmf_pdu_complete -> namf_message_transfer [label = "T7_T21: 
                         nsmf_pdu_session_request & nsmf_pdu_session_response_success
                     /
 rcv_nsm_pdu_response, nsmf_pdu_session_response = TRUE"]
-namf_message_transfer -> n2_pdu_requested [label = "success_T10: 
+namf_message_transfer -> n2_pdu_requested [label = "success_T22: 
                         nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request_success & namf_success & n2_sm_info
                     /
 request_n2_pdu, n2_pdu_session_request = TRUE"]
-namf_message_transfer -> namf_message_transfer [label = "success_T11: 
+session_establishment_successful -> session_establishment_successful [label = "success_T23: 
                         !n2_sm_info
                     /
 no_n2_sm_info"]
-namf_message_transfer -> no_session [label = "failed_T12: 
+namf_message_transfer -> no_session [label = "failed_T24: 
                         nsmf_pdu_session_response & nsmf_message_transfer & n2_pdu_session_request_success & !namf_success
                     /
 request_n2_pdu, n2_pdu_session_request = TRUE"]
-n2_pdu_requested -> session_establishment_successful [label = "T9_T13: 
+n2_pdu_requested -> session_establishment_successful [label = "T9_T25: 
                         n2_pdu_session_request & n2_pdu_session_ACKed
                     /
 n2_request_acked, n2_pdu_session_ACK = TRUE"]
-session_establishment_successful -> data_sent_upstream [label = "data_T14: 
+session_establishment_successful -> data_sent_upstream [label = "data_T26: 
                         n2_pdu_session_ACK
                     /
 data_sent, data_sent_up = TRUE"]
-data_sent_upstream -> data_processed_and_charged [label = "data_T15: 
+data_sent_upstream -> data_processed_and_charged [label = "data_T27: 
                         data_sent_up
                     /
 data_processing, data_done_processing = TRUE"]
-data_processed_and_charged -> data_received [label = "user_T16: 
+data_processed_and_charged -> normal_session [label = "user_T28: 
                         data_done_processing & !user_info_failure
                     /
-data_process_good"]
-data_processed_and_charged -> no_session [label = "late_T17: 
+data_process_good, data_received_ue = TRUE"]
+data_processed_and_charged -> no_session [label = "late_T29: 
                         user_info_failure
                     /
 data_processing_fail"]

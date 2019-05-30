@@ -151,6 +151,113 @@
             <fsm>visited_plmn</fsm>
         </VAR>
 
+        <VAR label="data_received_ue">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        
+
+
+
+        <VAR label="release_initiated">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>        
+
+        <VAR label="pdu_release_requested">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>
+
+        <VAR label="home_plmn_release_response">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>
+
+        <VAR label="home_plmn_info">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="n2_sm_resource">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>
+
+        <VAR label="n2_resource_release_request">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="release_command_issued">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="pdu_update_sm_context">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="vsmf_release_response">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="hsmf_policy_release">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="hsmf_context_removal">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="ue_initiated_release">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>
+
+        <VAR label="pdu_session_released">
+            <datatype>boolean</datatype>
+            <controltype>state</controltype>
+            <possiblevalues>TRUE,FALSE</possiblevalues>
+            <initialvalue>FALSE</initialvalue>
+        </VAR>
+
+        <VAR label="case_3_activation">
+            <datatype>boolean</datatype>
+            <controltype> environment </controltype>
+            <fsm>visited_plmn</fsm>
+        </VAR>
+
+
+
+
     </VARS>
 
     <FSMs>
@@ -170,14 +277,306 @@
                 <state>session_establishment_successful</state>
                 <state>data_sent_upstream</state>
                 <state>data_processed_and_charged</state>
-                <state>data_received</state>
+                <state>normal_session</state>
+
+                <state>session_release</state>
+                <state>home_response</state>
+                <state>n2_resource</state>
+                <state>ue_received_release</state>
+                <state>pdu_update_sm</state>
+                <state>vsmf_release</state>
+                <state>hsmf_policy_removal</state>
+                <state>hsmf_context_release</state>
+
             </states>
 
             <init_state>no_session</init_state>
 
             
             <transitions>
-                <transition label="T1_T1">
+                <transition label="release_T1">
+                    <start>vsmf_release</start>
+                    <end>hsmf_context_release</end>
+
+                    <condition>
+                        ue_initiated_release
+                    </condition>
+
+                    <actions>
+                        <action label="fork">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="hsmf_context_removal = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="release_T2">
+                    <start>ue_received_release</start>
+                    <end>vsmf_release</end>
+
+                    <condition>
+                        case_3_activation
+                    </condition>
+
+                    <actions>
+                        <action label="fork">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="hsmf_policy_release = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="release_T3">
+                    <start>home_response</start>
+                    <end>vsmf_release</end>
+
+                    <condition>
+                        n2_sm_resource
+                    </condition>
+
+                    <actions>
+                        <action label="fork">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="hsmf_policy_release = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="release_T4">
+                    <start>hsmf_context_release</start>
+                    <end>no_session</end>
+
+                    <condition>
+                        pdu_session_released
+                    </condition>
+
+                    <actions>
+                        <action label="fork">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="release_T5">
+                    <start>hsmf_policy_removal</start>
+                    <end>hsmf_context_release</end>
+
+                    <condition>
+                        hsmf_context_removal
+                    </condition>
+
+                    <actions>
+                        <action label="fork">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="pdu_session_released = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="release_T6">
+                    <start>vsmf_release</start>
+                    <end>hsmf_policy_removal</end>
+
+                    <condition>
+                        hsmf_policy_release
+                    </condition>
+
+                    <actions>
+                        <action label="fork">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="hsmf_context_removal = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="release_T7">
+                    <start>pdu_update_sm</start>
+                    <end>vsmf_release</end>
+
+                    <condition>
+                        vsmf_release_response
+                    </condition>
+
+                    <actions>
+                        <action label="fork">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="hsmf_policy_release = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="release_T8">
+                    <start>ue_received_release</start>
+                    <end>pdu_update_sm</end>
+
+                    <condition>
+                        pdu_update_sm_context
+                    </condition>
+
+                    <actions>
+                        <action label="fork">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="vsmf_release_response = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="release_T9">
+                    <start>n2_resource</start>
+                    <end>ue_received_release</end>
+
+                    <condition>
+                        release_command_issued
+                    </condition>
+
+                    <actions>
+                        <action label="fork">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="pdu_update_sm_context = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="release_T10">
+                    <start>home_response</start>
+                    <end>n2_resource</end>
+
+                    <condition>
+                        n2_resource_release_request &amp; !n2_sm_resource
+                    </condition>
+
+                    <actions>
+                        <action label="fork">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="release_command_issued = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="release_T11">
+                    <start>session_release</start>
+                    <end>home_response</end>
+
+                    <condition>
+                        home_plmn_release_response &amp; home_plmn_release_response
+                    </condition>
+
+                    <actions>
+                        <action label="fork">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="n2_resource_release_request = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="release_T12">
+                    <start>normal_session</start>
+                    <end>session_release</end>
+
+                    <condition>
+                        pdu_release_requested
+                    </condition>
+
+                    <actions>
+                        <action label="starting_release">
+                            <channel label="PLMN">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="home_plmn_release_response = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                    </actions>
+                </transition>
+
+                <transition label="T1_T13">
                     <start>no_session</start>
                     <end>session_establishment_requested</end>
 
@@ -201,7 +600,7 @@
                     </actions>
                 </transition>
 
-                <transition label="T2_T2">
+                <transition label="T2_T14">
                     <start>session_establishment_requested</start>
                     <end>sm_context_requested</end>
 
@@ -225,7 +624,7 @@
                     </actions>
                 </transition>
 
-                <transition label="T3_T3">
+                <transition label="T3_T15">
                     <start>sm_context_requested</start>
                     <end>sm_context_complete</end>
 
@@ -249,7 +648,7 @@
                     </actions>
                 </transition>
 
-                <transition label="failure_T4">
+                <transition label="failure_T16">
                     <start>no_session</start>
                     <end>no_session</end>
 
@@ -267,7 +666,7 @@
                     </actions>
                 </transition>
 
-                <transition label="T4_T5">
+                <transition label="T4_T17">
                     <start>sm_context_complete</start>
                     <end>n4_session_requested</end>
 
@@ -291,7 +690,7 @@
                     </actions>
                 </transition>
 
-                <transition label="T5_T6">
+                <transition label="T5_T18">
                     <start>n4_session_requested</start>
                     <end>n4_session_complete</end>
 
@@ -315,7 +714,7 @@
                     </actions>
                 </transition>
 
-                <transition label="T6_T7">
+                <transition label="T6_T19">
                     <start>n4_session_complete</start>
                     <end>nsmf_pdu_requested</end>
 
@@ -339,7 +738,7 @@
                     </actions>
                 </transition>
 
-                <transition label="T7_T8">
+                <transition label="T7_T20">
                     <start>nsmf_pdu_requested</start>
                     <end>nsmf_pdu_complete</end>
 
@@ -363,7 +762,7 @@
                     </actions>
                 </transition>
 
-                <transition label="T7_T9">
+                <transition label="T7_T21">
                     <start>nsmf_pdu_complete</start>
                     <end>namf_message_transfer</end>
 
@@ -387,7 +786,7 @@
                     </actions>
                 </transition>
 
-                <transition label="success_T10">
+                <transition label="success_T22">
                     <start>namf_message_transfer</start>
                     <end>n2_pdu_requested</end>
 
@@ -411,9 +810,9 @@
                     </actions>
                 </transition>
 
-                <transition label="success_T11">
-                    <start>namf_message_transfer</start>
-                    <end>namf_message_transfer</end>
+                <transition label="success_T23">
+                    <start>session_establishment_successful</start>
+                    <end>session_establishment_successful</end>
 
                     <condition>
                         !n2_sm_info
@@ -429,7 +828,7 @@
                     </actions>
                 </transition>
 
-                <transition label="failed_T12">
+                <transition label="failed_T24">
                     <start>namf_message_transfer</start>
                     <end>no_session</end>
 
@@ -453,7 +852,7 @@
                     </actions>
                 </transition>
 
-                <transition label="T9_T13">
+                <transition label="T9_T25">
                     <start>n2_pdu_requested</start>
                     <end>session_establishment_successful</end>
 
@@ -477,7 +876,7 @@
                     </actions>
                 </transition>
 
-                <transition label="data_T14">
+                <transition label="data_T26">
                     <start>session_establishment_successful</start>
                     <end>data_sent_upstream</end>
 
@@ -501,7 +900,7 @@
                     </actions>
                 </transition>
 
-                <transition label="data_T15">
+                <transition label="data_T27">
                     <start>data_sent_upstream</start>
                     <end>data_processed_and_charged</end>
 
@@ -525,9 +924,9 @@
                     </actions>
                 </transition>
 
-                <transition label="user_T16">
+                <transition label="user_T28">
                     <start>data_processed_and_charged</start>
-                    <end>data_received</end>
+                    <end>normal_session</end>
 
                     <condition>
                         data_done_processing &amp; !user_info_failure
@@ -540,10 +939,16 @@
                             <end> visited_plmn </end>
                             </channel>
                         </action>
+                        <action label="data_received_ue = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
                     </actions>
                 </transition>
 
-                <transition label="late_T17">
+                <transition label="late_T29">
                     <start>data_processed_and_charged</start>
                     <end>no_session</end>
 
