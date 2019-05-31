@@ -76,16 +76,6 @@ visited_plmn_state	:
 
 visited_plmn_action	:
 {
-	visited_plmn_hsmf_context_deletion,
-	visited_plmn_normal_release,
-	visited_plmn_branch,
-	visited_plmn_release_completion,
-	visited_plmn_hsmf_context_removing,
-	visited_plmn_hsmf_policy_removing,
-	visited_plmn_vsmf_release_process,
-	visited_plmn_pdu_update_sm_context_release,
-	visited_plmn_ue_release_command,
-	visited_plmn_pinging_home,
 	visited_plmn_fork,
 	visited_plmn_starting_release,
 	visited_plmn_establish_request,
@@ -140,7 +130,7 @@ release_T10	:=	 (visited_plmn_state = home_response &
                         n2_resource_release_request & !n2_sm_resource
                     )	;
 release_T11	:=	 (visited_plmn_state = session_release & 
-                        home_plmn_release_response & home_plmn_release_response & release_initiated
+                        home_plmn_release_response & home_plmn_release_response
                     )	;
 release_T12	:=	 (visited_plmn_state = normal_session & 
                         pdu_release_requested
@@ -244,17 +234,7 @@ init(visited_plmn_action)	:= visited_plmn_null_action	;
 
 next(visited_plmn_action)	:=	 case
 
-(release_T1 )	:	visited_plmn_hsmf_context_deletion	;
-(release_T2 )	:	visited_plmn_normal_release	;
-(release_T3 )	:	visited_plmn_branch	;
-(release_T4 )	:	visited_plmn_release_completion	;
-(release_T5 )	:	visited_plmn_hsmf_context_removing	;
-(release_T6 )	:	visited_plmn_hsmf_policy_removing	;
-(release_T7 )	:	visited_plmn_vsmf_release_process	;
-(release_T8 )	:	visited_plmn_pdu_update_sm_context_release	;
-(release_T9 )	:	visited_plmn_ue_release_command	;
-(release_T10 )	:	visited_plmn_pinging_home	;
-(release_T11 )	:	visited_plmn_fork	;
+(release_T1 | release_T2 | release_T3 | release_T4 | release_T5 | release_T6 | release_T7 | release_T8 | release_T9 | release_T10 | release_T11 )	:	visited_plmn_fork	;
 (release_T12 )	:	visited_plmn_starting_release	;
 (T1_T13 )	:	visited_plmn_establish_request	;
 (T2_T14 )	:	visited_plmn_send_sm_context_request	;
@@ -383,15 +363,6 @@ esac	;
 
 
 
-init(release_initiated)	:= FALSE	;
-
-next(release_initiated)	:=	 case
-(release_T12 )	:	TRUE	;
-TRUE	:	release_initiated	;
-esac	;
-
-
-
 init(n2_resource_release_request)	:= FALSE	;
 
 next(n2_resource_release_request)	:=	 case
@@ -453,7 +424,6 @@ next(pdu_session_released)	:=	 case
 TRUE	:	pdu_session_released	;
 esac	;
 
-
 --- PROPERTY 1: If the data is sent upstream by UE, it will receive a response.
 LTLSPEC G((data_sent_up) -> F(data_received_ue));
 
@@ -461,5 +431,4 @@ LTLSPEC G((data_sent_up) -> F(data_received_ue));
 LTLSPEC G((n2_pdu_session_ACK) -> F(data_received_ue));
 
 --- PROPERTY 3: If a release is requested, then the UE will eventually see the command to release
-LTLSPEC G((release_initiated) -> F(release_command_issued));
-
+LTLSPEC G((pdu_release_requested) -> F(release_command_issued));

@@ -303,7 +303,7 @@
                     </condition>
 
                     <actions>
-                        <action label="hsmf_context_deletion">
+                        <action label="fork">
                             <channel label="PLMN">
                             <start> visited_plmn </start>
                             <end> visited_plmn </end>
@@ -327,7 +327,7 @@
                     </condition>
 
                     <actions>
-                        <action label="normal_release">
+                        <action label="fork">
                             <channel label="PLMN">
                             <start> visited_plmn </start>
                             <end> visited_plmn </end>
@@ -351,7 +351,7 @@
                     </condition>
 
                     <actions>
-                        <action label="branch">
+                        <action label="fork">
                             <channel label="PLMN">
                             <start> visited_plmn </start>
                             <end> visited_plmn </end>
@@ -375,7 +375,7 @@
                     </condition>
 
                     <actions>
-                        <action label="release_completion">
+                        <action label="fork">
                             <channel label="PLMN">
                             <start> visited_plmn </start>
                             <end> visited_plmn </end>
@@ -393,7 +393,7 @@
                     </condition>
 
                     <actions>
-                        <action label="hsmf_context_removing">
+                        <action label="fork">
                             <channel label="PLMN">
                             <start> visited_plmn </start>
                             <end> visited_plmn </end>
@@ -417,7 +417,7 @@
                     </condition>
 
                     <actions>
-                        <action label="hsmf_policy_removing">
+                        <action label="fork">
                             <channel label="PLMN">
                             <start> visited_plmn </start>
                             <end> visited_plmn </end>
@@ -441,7 +441,7 @@
                     </condition>
 
                     <actions>
-                        <action label="vsmf_release_process">
+                        <action label="fork">
                             <channel label="PLMN">
                             <start> visited_plmn </start>
                             <end> visited_plmn </end>
@@ -465,7 +465,7 @@
                     </condition>
 
                     <actions>
-                        <action label="pdu_update_sm_context_release">
+                        <action label="fork">
                             <channel label="PLMN">
                             <start> visited_plmn </start>
                             <end> visited_plmn </end>
@@ -489,7 +489,7 @@
                     </condition>
 
                     <actions>
-                        <action label="ue_release_command">
+                        <action label="fork">
                             <channel label="PLMN">
                             <start> visited_plmn </start>
                             <end> visited_plmn </end>
@@ -513,7 +513,7 @@
                     </condition>
 
                     <actions>
-                        <action label="pinging_home">
+                        <action label="fork">
                             <channel label="PLMN">
                             <start> visited_plmn </start>
                             <end> visited_plmn </end>
@@ -533,7 +533,7 @@
                     <end>home_response</end>
 
                     <condition>
-                        home_plmn_release_response &amp; home_plmn_release_response &amp; release_initiated
+                        home_plmn_release_response &amp; home_plmn_release_response
                     </condition>
 
                     <actions>
@@ -573,16 +573,8 @@
                             <end> visited_plmn </end>
                             </channel>
                         </action>
-                        <action label="release_initiated = TRUE">
-                            <channel label="internal">
-                            <start> visited_plmn </start>
-                            <end> visited_plmn </end>
-                            </channel>
-                        </action>
                     </actions>
                 </transition>
-
-
 
                 <transition label="T1_T13">
                     <start>no_session</start>

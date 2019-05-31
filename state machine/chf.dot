@@ -26,51 +26,51 @@ node [shape = circle, label="hsmf_context_release"]hsmf_context_release;
 vsmf_release -> hsmf_context_release [label = "release_T1: 
                         ue_initiated_release
                     /
-hsmf_context_deletion, hsmf_context_removal = TRUE"]
+fork, hsmf_context_removal = TRUE"]
 ue_received_release -> vsmf_release [label = "release_T2: 
                         case_3_activation
                     /
-normal_release, hsmf_policy_release = TRUE"]
+fork, hsmf_policy_release = TRUE"]
 home_response -> vsmf_release [label = "release_T3: 
                         n2_sm_resource
                     /
-branch, hsmf_policy_release = TRUE"]
+fork, hsmf_policy_release = TRUE"]
 hsmf_context_release -> no_session [label = "release_T4: 
                         pdu_session_released
                     /
-release_completion"]
+fork"]
 hsmf_policy_removal -> hsmf_context_release [label = "release_T5: 
                         hsmf_context_removal
                     /
-hsmf_context_removing, pdu_session_released = TRUE"]
+fork, pdu_session_released = TRUE"]
 vsmf_release -> hsmf_policy_removal [label = "release_T6: 
                         hsmf_policy_release
                     /
-hsmf_policy_removing, hsmf_context_removal = TRUE"]
+fork, hsmf_context_removal = TRUE"]
 pdu_update_sm -> vsmf_release [label = "release_T7: 
                         vsmf_release_response
                     /
-vsmf_release_process, hsmf_policy_release = TRUE"]
+fork, hsmf_policy_release = TRUE"]
 ue_received_release -> pdu_update_sm [label = "release_T8: 
                         pdu_update_sm_context
                     /
-pdu_update_sm_context_release, vsmf_release_response = TRUE"]
+fork, vsmf_release_response = TRUE"]
 n2_resource -> ue_received_release [label = "release_T9: 
                         release_command_issued
                     /
-ue_release_command, pdu_update_sm_context = TRUE"]
+fork, pdu_update_sm_context = TRUE"]
 home_response -> n2_resource [label = "release_T10: 
                         n2_resource_release_request & !n2_sm_resource
                     /
-pinging_home, release_command_issued = TRUE"]
+fork, release_command_issued = TRUE"]
 session_release -> home_response [label = "release_T11: 
-                        home_plmn_release_response & home_plmn_release_response & release_initiated
+                        home_plmn_release_response & home_plmn_release_response
                     /
 fork, n2_resource_release_request = TRUE"]
 normal_session -> session_release [label = "release_T12: 
                         pdu_release_requested
                     /
-starting_release, home_plmn_release_response = TRUE, release_initiated = TRUE"]
+starting_release, home_plmn_release_response = TRUE"]
 no_session -> session_establishment_requested [label = "T1_T13: 
                         pdu_session_establishment_requested
                     /

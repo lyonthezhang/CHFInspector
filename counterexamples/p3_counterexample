@@ -1,5 +1,5 @@
-  -> State: 3.1 <-
-    pdu_session_establishment_requested = FALSE
+ -> State: 3.1 <-
+    pdu_session_establishment_requested = TRUE
     process_initiated = FALSE
     sm_context_request = FALSE
     sm_context_request_success = FALSE
@@ -23,7 +23,7 @@
     data_done_processing = FALSE
     user_info_failure = FALSE
     data_received_ue = FALSE
-    release_initiated = TRUE
+    release_initiated = FALSE
     pdu_release_requested = FALSE
     home_plmn_release_response = FALSE
     home_plmn_info = FALSE
@@ -55,7 +55,7 @@
     failure_T16 = TRUE
     T3_T15 = FALSE
     T2_T14 = FALSE
-    T1_T13 = FALSE
+    T1_T13 = TRUE
     release_T12 = FALSE
     release_T11 = FALSE
     release_T10 = FALSE
@@ -69,3 +69,114 @@
     release_T2 = FALSE
     release_T1 = FALSE
   -> State: 3.2 <-
+    process_initiated = TRUE
+    visited_plmn_action = visited_plmn_establish_request
+    failure_T16 = FALSE
+  -> State: 3.3 <-
+    pdu_session_establishment_requested = FALSE
+    sm_context_request_success = TRUE
+    visited_plmn_state = session_establishment_requested
+    T2_T14 = TRUE
+    T1_T13 = FALSE
+  -> State: 3.4 <-
+    sm_context_request = TRUE
+    sm_context_request_success = FALSE
+    sm_context_response_success = TRUE
+    visited_plmn_state = sm_context_requested
+    visited_plmn_action = visited_plmn_send_sm_context_request
+    T3_T15 = TRUE
+    T2_T14 = FALSE
+  -> State: 3.5 <-
+    sm_context_response = TRUE
+    sm_context_response_success = FALSE
+    n4_session_request_success = TRUE
+    visited_plmn_state = sm_context_complete
+    visited_plmn_action = visited_plmn_rcv_sm_context_response
+    T4_T17 = TRUE
+    T3_T15 = FALSE
+  -> State: 3.6 <-
+    n4_session_request = TRUE
+    n4_session_request_success = FALSE
+    n4_session_response_success = TRUE
+    visited_plmn_state = n4_session_requested
+    visited_plmn_action = visited_plmn_send_n4_request
+    T5_T18 = TRUE
+    T4_T17 = FALSE
+  -> State: 3.7 <-
+    n4_session_response = TRUE
+    n4_session_response_success = FALSE
+    visited_plmn_state = n4_session_complete
+    visited_plmn_action = visited_plmn_rcv_n4_response
+    T6_T19 = TRUE
+    T5_T18 = FALSE
+  -> State: 3.8 <-
+    nsmf_pdu_session_request = TRUE
+    nsmf_pdu_session_response_success = TRUE
+    visited_plmn_state = nsmf_pdu_requested
+    visited_plmn_action = visited_plmn_request_nsm_pdu
+    T7_T20 = TRUE
+    T6_T19 = FALSE
+  -> State: 3.9 <-
+    nsmf_pdu_session_response = TRUE
+    visited_plmn_state = nsmf_pdu_complete
+    visited_plmn_action = visited_plmn_rcv_nsm_pdu_response
+    T7_T21 = TRUE
+    T7_T20 = FALSE
+  -> State: 3.10 <-
+    nsmf_pdu_session_response_success = FALSE
+    n2_sm_info = TRUE
+    nsmf_message_transfer = TRUE
+    namf_success = TRUE
+    n2_pdu_session_request_success = TRUE
+    visited_plmn_state = namf_message_transfer
+    success_T22 = TRUE
+    T7_T21 = FALSE
+  -> State: 3.11 <-
+    n2_sm_info = FALSE
+    nsmf_message_transfer = FALSE
+    n2_pdu_session_request = TRUE
+    namf_success = FALSE
+    n2_pdu_session_request_success = FALSE
+    n2_pdu_session_ACKed = TRUE
+    visited_plmn_state = n2_pdu_requested
+    visited_plmn_action = visited_plmn_request_n2_pdu
+    T9_T25 = TRUE
+    success_T22 = FALSE
+  -> State: 3.12 <-
+    n2_sm_info = TRUE
+    n2_pdu_session_ACK = TRUE
+    n2_pdu_session_ACKed = FALSE
+    visited_plmn_state = session_establishment_successful
+    visited_plmn_action = visited_plmn_n2_request_acked
+    data_T26 = TRUE
+    T9_T25 = FALSE
+  -> State: 3.13 <-
+    n2_sm_info = FALSE
+    data_sent_up = TRUE
+    visited_plmn_state = data_sent_upstream
+    visited_plmn_action = visited_plmn_data_sent
+    data_T27 = TRUE
+    data_T26 = FALSE
+  -> State: 3.14 <-
+    data_done_processing = TRUE
+    visited_plmn_state = data_processed_and_charged
+    visited_plmn_action = visited_plmn_data_processing
+    user_T28 = TRUE
+    data_T27 = FALSE
+  -> State: 3.15 <-
+    data_received_ue = TRUE
+    pdu_release_requested = TRUE
+    visited_plmn_state = normal_session
+    visited_plmn_action = visited_plmn_data_process_good
+    user_T28 = FALSE
+    release_T12 = TRUE
+  -> State: 3.16 <-
+    release_initiated = TRUE
+    pdu_release_requested = FALSE
+    visited_plmn_state = session_release
+    visited_plmn_action = visited_plmn_starting_release
+    release_T12 = FALSE
+  -- Loop starts here
+  -> State: 3.17 <-
+    visited_plmn_action = visited_plmn_null_action
+  -> State: 3.18 <-
