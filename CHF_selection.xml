@@ -188,7 +188,7 @@
             <initialvalue>FALSE</initialvalue>
         </VAR>
 
-        <VAR label="n2_sm_resource">
+        <VAR label="SMF_PCF_AMF_init">
             <datatype>boolean</datatype>
             <controltype> environment </controltype>
             <fsm>visited_plmn</fsm>
@@ -347,7 +347,7 @@
                     <end>vsmf_release</end>
 
                     <condition>
-                        n2_sm_resource
+                        SMF_PCF_AMF_init
                     </condition>
 
                     <actions>
@@ -509,7 +509,7 @@
                     <end>n2_resource</end>
 
                     <condition>
-                        n2_resource_release_request &amp; !n2_sm_resource
+                        n2_resource_release_request &amp; !SMF_PCF_AMF_init
                     </condition>
 
                     <actions>
@@ -533,7 +533,7 @@
                     <end>home_response</end>
 
                     <condition>
-                        home_plmn_release_response &amp; home_plmn_release_response &amp; release_initiated
+                        release_initiated
                     </condition>
 
                     <actions>
@@ -568,6 +568,12 @@
                             </channel>
                         </action>
                         <action label="home_plmn_release_response = TRUE">
+                            <channel label="internal">
+                            <start> visited_plmn </start>
+                            <end> visited_plmn </end>
+                            </channel>
+                        </action>
+                        <action label="data_received_ue = TRUE">
                             <channel label="internal">
                             <start> visited_plmn </start>
                             <end> visited_plmn </end>
@@ -943,12 +949,6 @@
                     <actions>
                         <action label="data_process_good">
                             <channel label="PLMN">
-                            <start> visited_plmn </start>
-                            <end> visited_plmn </end>
-                            </channel>
-                        </action>
-                        <action label="data_received_ue = TRUE">
-                            <channel label="internal">
                             <start> visited_plmn </start>
                             <end> visited_plmn </end>
                             </channel>

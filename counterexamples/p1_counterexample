@@ -1,4 +1,4 @@
--> State: 1.1 <-
+  -> State: 1.1 <-
     pdu_session_establishment_requested = TRUE
     process_initiated = FALSE
     sm_context_request = FALSE
@@ -143,15 +143,33 @@
     T9_T25 = TRUE
     success_T22 = FALSE
   -> State: 1.12 <-
+    n2_sm_info = TRUE
     n2_pdu_session_ACK = TRUE
     n2_pdu_session_ACKed = FALSE
     visited_plmn_state = session_establishment_successful
     visited_plmn_action = visited_plmn_n2_request_acked
     data_T26 = TRUE
     T9_T25 = FALSE
-    success_T23 = TRUE
-  -- Loop starts here
   -> State: 1.13 <-
+    n2_sm_info = FALSE
     data_sent_up = TRUE
-    visited_plmn_action = visited_plmn_no_n2_sm_info
+    visited_plmn_state = data_sent_upstream
+    visited_plmn_action = visited_plmn_data_sent
+    data_T27 = TRUE
+    data_T26 = FALSE
   -> State: 1.14 <-
+    data_done_processing = TRUE
+    user_info_failure = TRUE
+    visited_plmn_state = data_processed_and_charged
+    visited_plmn_action = visited_plmn_data_processing
+    late_T29 = TRUE
+    data_T27 = FALSE
+  -> State: 1.15 <-
+    user_info_failure = FALSE
+    visited_plmn_state = no_session
+    visited_plmn_action = visited_plmn_data_processing_fail
+    late_T29 = FALSE
+  -- Loop starts here
+  -> State: 1.16 <-
+    visited_plmn_action = visited_plmn_null_action
+  -> State: 1.17 <-

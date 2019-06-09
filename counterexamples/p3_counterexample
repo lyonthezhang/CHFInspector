@@ -1,4 +1,4 @@
- -> State: 3.1 <-
+  -> State: 3.1 <-
     pdu_session_establishment_requested = TRUE
     process_initiated = FALSE
     sm_context_request = FALSE
@@ -164,19 +164,50 @@
     user_T28 = TRUE
     data_T27 = FALSE
   -> State: 3.15 <-
-    data_received_ue = TRUE
     pdu_release_requested = TRUE
     visited_plmn_state = normal_session
     visited_plmn_action = visited_plmn_data_process_good
     user_T28 = FALSE
     release_T12 = TRUE
   -> State: 3.16 <-
+    data_received_ue = TRUE
     release_initiated = TRUE
     pdu_release_requested = FALSE
     visited_plmn_state = session_release
     visited_plmn_action = visited_plmn_starting_release
     release_T12 = FALSE
-  -- Loop starts here
+    release_T11 = TRUE
   -> State: 3.17 <-
-    visited_plmn_action = visited_plmn_null_action
+    n2_sm_resource = TRUE
+    n2_resource_release_request = TRUE
+    visited_plmn_state = home_response
+    visited_plmn_action = visited_plmn_fork
+    release_T11 = FALSE
+    release_T3 = TRUE
   -> State: 3.18 <-
+    n2_sm_resource = FALSE
+    hsmf_policy_release = TRUE
+    visited_plmn_state = vsmf_release
+    visited_plmn_action = visited_plmn_branch
+    release_T6 = TRUE
+    release_T3 = FALSE
+  -> State: 3.19 <-
+    hsmf_context_removal = TRUE
+    visited_plmn_state = hsmf_policy_removal
+    visited_plmn_action = visited_plmn_hsmf_policy_removing
+    release_T6 = FALSE
+    release_T5 = TRUE
+  -> State: 3.20 <-
+    pdu_session_released = TRUE
+    visited_plmn_state = hsmf_context_release
+    visited_plmn_action = visited_plmn_hsmf_context_removing
+    release_T5 = FALSE
+    release_T4 = TRUE
+  -> State: 3.21 <-
+    visited_plmn_state = no_session
+    visited_plmn_action = visited_plmn_release_completion
+    release_T4 = FALSE
+  -- Loop starts here
+  -> State: 3.22 <-
+    visited_plmn_action = visited_plmn_null_action
+  -> State: 3.23 <-
